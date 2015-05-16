@@ -1,0 +1,49 @@
+// Line comment
+
+// Global vars
+int globIntVar = 0;
+string globStringVarWithInit = "It is global string";
+bool globBoolVar = false;
+int glob;
+firstClass motherfucker;
+
+struct firstClass {
+     int num;
+     bool flag;
+}
+
+// void function
+void doNothing () {
+    firstClass l(5, true);
+}
+
+
+// Union example
+bool getBean () {
+    //union {int r, int l};
+    firstClass t(6, false);
+    bool result = t.flag && (globIntVar == 0);
+    return result;
+}
+
+// power example
+int power (int k, int n) {
+    int r = 1;
+//    while (k > 0) {
+//        if (k % 2 == 1) {
+//            r = r * n;
+//        }
+        n = n * n;
+        k = k / 2;
+//    }
+    return n * k;
+}
+
+int main(){
+    int k = 5;
+    int n = 6;
+//    read(n);
+//    read(k);
+    write(power(k, n));
+    return 0;
+}
