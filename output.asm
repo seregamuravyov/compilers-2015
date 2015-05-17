@@ -71,6 +71,10 @@ push eax
 pop eax
 mov [ebp - 4], eax
 push dword [ebp - 4]
+push int_format
+call printf
+add esp, 8
+push dword [ebp - 4]
 pop eax
 mov esp, ebp
 pop ebp
@@ -90,17 +94,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L85
+ja  L93
 mov eax, 0
-jmp L86
-L85:
+jmp L94
+L93:
 mov eax, 1
-L86:
+L94:
 push eax
 pop eax
 cmp eax, 1
-jne L79
-L80:
+jne L87
+L88:
 push dword [ebp + 8]
 push 2
 pop ebx
@@ -113,16 +117,16 @@ push 1
 pop ebx
 pop edx
 cmp edx, ebx
-je  L101
+je  L109
 mov eax, 0
-jmp L102
-L101:
+jmp L110
+L109:
 mov eax, 1
-L102:
+L110:
 push eax
 pop eax
 cmp eax, 1
-jne L93
+jne L101
 push dword [ebp - 4]
 push dword [ebp + 12]
 pop ebx
@@ -131,7 +135,7 @@ imul ebx
 push eax
 pop eax
 mov [ebp - 4], eax
-L93:
+L101:
 push dword [ebp + 12]
 push dword [ebp + 12]
 pop ebx
@@ -154,17 +158,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L141
+ja  L149
 mov eax, 0
-jmp L142
-L141:
+jmp L150
+L149:
 mov eax, 1
-L142:
+L150:
 push eax
 pop eax
 cmp eax, 1
-je L80
-L79:
+je L88
+L87:
 push dword [ebp - 4]
 pop eax
 mov esp, ebp
@@ -177,6 +181,7 @@ main:
 push ebp
 mov ebp, esp
 sub esp, 16
+call getBean
 push 2
 pop eax
 mov [ebp - 4], eax
@@ -205,7 +210,7 @@ push dword [ebp - 8]
 push dword [ebp - 4]
 call power
 push eax
-push int_formatln
+push int_format
 call printf
 add esp, 8
 push tmp3
@@ -216,6 +221,22 @@ pop eax
 mov [ebp - 16], eax
 push dword [ebp - 12]
 push dword [ebp - 16]
+call strcmp
+add esp, 8
+mov ebx, eax
+cmp ebx, 0
+jne L265
+mov eax, 0
+jmp 266
+L265:
+mov eax, 1
+L266:
+push eax
+pop eax
+cmp eax, 1
+jne L257
+push dword [ebp - 12]
+push dword [ebp - 16]
 pop ebx
 pop edx
 push ebx
@@ -223,9 +244,10 @@ push edx
 call strcat
 add esp, 8
 push eax
-;push str_format
+push str_format
 call printf
 add esp, 8
+L257:
 push 0
 pop eax
 mov esp, ebp
@@ -236,7 +258,6 @@ ret
 
 section .data
 int_format dd "%d", 10, 0
-int_formatln db "%d", 10, 0
 str_format dd "%s", 10, 0
 globIntVar: dd 0
 globStringVarWithInit: dd "It is global string", 0
@@ -244,7 +265,7 @@ globBoolVar: dd 0
 tmp1: dd "Enter n: ", 0
 tmp2: dd "Enter k: ", 0
 tmp3: dd "hello, ", 0
-tmp4: db "world!", 10, 0
+tmp4: dd "motherfuckers!", 0
 
 section .bss
 glob: resd 1

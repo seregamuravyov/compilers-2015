@@ -23,6 +23,7 @@ bool getBean () {
     //union {int r, int l};
     firstClass t(6, false);
     bool result = t.flag && (globIntVar == 0);
+    write(result);
     return result;
 }
 
@@ -36,12 +37,11 @@ int power (int k, int n) {
         n = n * n;
         k = k / 2;
     }
-    //write("r = ");
-    //write(r);
     return r;
 }
 
 int main(){
+    getBean();
     int k = 2;
     int n = 6;
     write("Enter n: ");
@@ -50,10 +50,9 @@ int main(){
     read(k);
     write(power(k, n));
     string s = "hello, ";
-    string ta = "world!";
-    write(s + ta);
-//    if (s != t){
-//        write(s + t);
-//    }
+    string t = "motherfuckers!";
+    if (s != t){
+        write(s + t);
+    }
     return 0;
 }

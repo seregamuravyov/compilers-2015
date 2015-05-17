@@ -339,6 +339,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         switch (format){
             case "int":
                 return "int_format";
+            case "bool":
+                return "int_format";
             case "string":
                 return "str_format";
             default:
@@ -402,13 +404,14 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             } else {
                 if ((ctx.IDENTIFIER() != null) && (funcStorage.containsKey(ctx.IDENTIFIER().getText()))){
                     String funcName = ctx.IDENTIFIER().getText();
-                    for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
-                        Pair<String, List<String>> exprRes = visitExpression(ctx.expressionList().expression(i));
-                        if (exprRes.getKey().equals(funcStorage.get(funcName).getArgType(i)))
-                            code.addAll(exprRes.getValue());
-                        else
-                            throw new IllegalArgumentException("Type of some arguments doen's match the defenition");
-                    }
+                    if (ctx.expressionList() != null)
+                        for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
+                            Pair<String, List<String>> exprRes = visitExpression(ctx.expressionList().expression(i));
+                            if (exprRes.getKey().equals(funcStorage.get(funcName).getArgType(i)))
+                                code.addAll(exprRes.getValue());
+                            else
+                                throw new IllegalArgumentException("Type of some arguments doen's match the defenition");
+                        }
                    code.add("call " + ctx.IDENTIFIER().getText());
                    return new Pair<>(funcStorage.get(funcName).getReturnType(), code);
                 }
@@ -847,7 +850,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    //dataSection.add(var + ": dd " + ctx.STRING_LITERAL().getText() + ", 0");
                     code.add("push " + var);
                     return new Pair<>("string", code);
                 }
@@ -951,8 +953,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 try {
                     if (type.equals("int") || type.equals("bool") || type.equals("string"))
                         vst.addLocalVariable(name, type, datatypeSize.get(type));
-                    else
+                    else {
                         vst.addGlobalVariable(name, type, datatypeSize.get(type));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1024,7 +1027,12 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 String name = ctx.IDENTIFIER(i).getText();
                 if (!vst.containsVariable(name)){
                     try {
-                        vst.addLocalVariable(name, type, size);
+                        //vst.addLocalVariable(name, type, size);
+                        if (type.equals("int") || type.equals("bool") || type.equals("string"))
+                            vst.addLocalVariable(name, type, size);
+                        else {
+                            vst.addGlobalVariable(name, type, size);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
