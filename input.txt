@@ -29,21 +29,31 @@ bool getBean () {
 // power example
 int power (int k, int n) {
     int r = 1;
-//    while (k > 0) {
-//        if (k % 2 == 1) {
-//            r = r * n;
-//        }
+    while (k > 0) {
+        if (k % 2 == 1) {
+            r = r * n;
+        }
         n = n * n;
         k = k / 2;
-//    }
-    return n * k;
+    }
+    //write("r = ");
+    //write(r);
+    return r;
 }
 
 int main(){
-    int k = 5;
+    int k = 2;
     int n = 6;
-//    read(n);
-//    read(k);
+    write("Enter n: ");
+    read(n);
+    write("Enter k: ");
+    read(k);
     write(power(k, n));
+    string s = "hello, ";
+    string ta = "world!";
+    write(s + ta);
+//    if (s != t){
+//        write(s + t);
+//    }
     return 0;
 }

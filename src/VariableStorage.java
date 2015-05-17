@@ -19,7 +19,7 @@ public class VariableStorage {
 
     public void addGlobalVariable(String name, String type, int size) throws Exception {
         if (!containsVariable(name))
-            storage.peek().put(name, new Pair<>(type, "[" + name + "]"));
+            storage.get(0).put(name, new Pair<>(type, "[" + name + "]"));
         else
             throw new Exception("Redefenition of variable " + name);
     }

@@ -199,6 +199,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             Pair<String, List<String>> returnStatement = visitExpression(ctx.expression());
             returnType = returnStatement.getKey();
             code.addAll(returnStatement.getValue());
+            code.add("pop eax");
         }
 
         return new Pair<String, List<String>>(returnType, code);
@@ -261,17 +262,77 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
     @Override
     public Pair<String, List<String>> visitConditionStatement(GrammarParser.ConditionStatementContext ctx) {
-        return super.visitConditionStatement(ctx);
+        List<String> code = new LinkedList<String>();
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
+
+        Pair<String, List<String>> expr = visitExpression(ctx.expression());
+        if (expr.getKey().equals("bool")){
+            code.addAll(expr.getValue());
+            code.add("pop eax");
+            if (ctx.ELSE() == null){ //if() {};
+                code.add("cmp eax, 1");
+
+                localLabelCounter++;
+                code.add("jne L" + localLabelCounter);
+                code.addAll(visitCompoundStatement(ctx.compoundStatement(0)).getValue());
+                code.add("L" + localLabelCounter + ":");
+                labelCounter += 4;
+
+            } else { // if() {} else {}
+                code.add("cmp eax, 1");
+                localLabelCounter++;
+                code.add("jne L" + localLabelCounter);
+                code.addAll(visitCompoundStatement(ctx.compoundStatement(0)).getValue());
+                code.add("L" + localLabelCounter + ":");
+                code.addAll(visitCompoundStatement(ctx.compoundStatement(1)).getValue());
+                labelCounter += 4;
+
+            }
+        } else {
+            throw new IllegalArgumentException("Value of the condition must be boolean");
+        }
+
+
+        return new Pair<>("condition", code);
     }
 
     @Override
     public Pair<String, List<String>> visitCompoundStatement(GrammarParser.CompoundStatementContext ctx) {
-        return super.visitCompoundStatement(ctx);
+        List<String> code = new LinkedList<String>();
+
+        for (int i = 0; i < ctx.statement().size(); i++) {
+            code.addAll(visitStatement(ctx.statement(i)).getValue());
+        }
+        return new Pair<>("compound", code);
     }
 
     @Override
     public Pair<String, List<String>> visitWhileStatement(GrammarParser.WhileStatementContext ctx) {
-        return super.visitWhileStatement(ctx);
+        List<String> code = new LinkedList<String>();
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
+
+        Pair<String, List<String>> expr = visitExpression(ctx.expression());
+        if (expr.getKey().equals("bool")){
+            code.addAll(expr.getValue());
+            code.add("pop eax");
+            code.add("cmp eax, 1");
+            localLabelCounter++;
+            code.add("jne L" + localLabelCounter);
+            code.add("L" + (localLabelCounter + 1) + ":");
+            code.addAll(visitCompoundStatement(ctx.compoundStatement()).getValue());
+            code.addAll(visitExpression(ctx.expression()).getValue());
+            code.add("pop eax");
+            code.add("cmp eax, 1");
+            code.add("je L" + (localLabelCounter + 1));
+            code.add("L" + localLabelCounter + ":");
+            labelCounter += 4;
+
+        } else {
+            throw new IllegalArgumentException("Value inside the \"while\" must be boolean");
+        }
+        return new Pair<>("while", code);
     }
 
     private String getFormat(String format) {
@@ -307,7 +368,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             }
             if (vst.containsVariable(name)){
                 try {
-                    code.add("push dword" + vst.getVariableAddress(name));
+                    code.add("lea ebx, " + vst.getVariableAddress(name));
                     type = vst.getVariableType(name);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -315,16 +376,19 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             } else {
                 if (funcArg) {
                     try {
-                        code.add("push " + f.getArgAdress(name));
+                        code.add("lea ebx, " + f.getArgAdress(name));
+
                         type = f.getArgType(name);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
+            code.add("push ebx");
             format = getFormat(type);
             code.add("push " + format);
             code.add("call scanf");
+            code.add("add esp, 8");
             return new Pair<>("void", code);
         } else {
             if (ctx.WRITE() != null){
@@ -333,6 +397,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 format = getFormat(arg.getKey());
                 code.add("push " + format);
                 code.add("call printf");
+                code.add("add esp, 8");
                 return new Pair<>("void", code);
             } else {
                 if ((ctx.IDENTIFIER() != null) && (funcStorage.containsKey(ctx.IDENTIFIER().getText()))){
@@ -407,6 +472,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
     @Override
     public Pair<String, List<String>> visitExpression(GrammarParser.ExpressionContext ctx) {
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
         Pair<String, List<String>> andExpr = visitAndExpr(ctx.andExpr(0));
         if (ctx.andExpr().size() > 1) {
             for (int i = 1; i < ctx.andExpr().size(); ++i) {
@@ -414,20 +481,20 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 if (andExpr.getKey().equals("bool") && nextAndExpr.getKey().equals("bool")) {
                     andExpr.getValue().addAll(nextAndExpr.getValue());
 
-                    labelCounter++;
+                    localLabelCounter++;
                     andExpr.getValue().add("pop ebx");
                     andExpr.getValue().add("pop edx");
                     andExpr.getValue().add("cmp edx, 1");
-                    andExpr.getValue().add("je L" + labelCounter);
+                    andExpr.getValue().add("je L" + localLabelCounter);
                     andExpr.getValue().add("cmp ebx, 1");
-                    andExpr.getValue().add("jne L" + (labelCounter - 1));
-                    andExpr.getValue().add("L" + (labelCounter) + ":");
+                    andExpr.getValue().add("jne L" + (localLabelCounter - 1));
+                    andExpr.getValue().add("L" + (localLabelCounter) + ":");
                     andExpr.getValue().add("mov eax, 1");
-                    andExpr.getValue().add("jmp L" + (labelCounter + 1));
-                    andExpr.getValue().add("L" + (labelCounter - 1) + ":");
+                    andExpr.getValue().add("jmp L" + (localLabelCounter + 1));
+                    andExpr.getValue().add("L" + (localLabelCounter - 1) + ":");
                     andExpr.getValue().add("mov eax, 0");
-                    andExpr.getValue().add("L" + (labelCounter + 1) + ":");
-                    labelCounter += 2;
+                    andExpr.getValue().add("L" + (localLabelCounter + 1) + ":");
+                    labelCounter += 4;
                     andExpr.getValue().add("push eax");
                     andExpr = new Pair<>("bool", andExpr.getValue());
                 } else {
@@ -443,30 +510,32 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
     @Override
     public Pair<String, List<String>> visitAndExpr(GrammarParser.AndExprContext ctx) {
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
         Pair<String, List<String>> equalityExpr = visitEqualityExpr(ctx.equalityExpr(0));
         if (ctx.equalityExpr().size() > 1)
             for (int i = 1; i < ctx.equalityExpr().size(); ++i) {
                 Pair<String, List<String>> nextAndExpr = visitEqualityExpr(ctx.equalityExpr(i));
                 if (equalityExpr.getKey().equals("bool") && nextAndExpr.getKey().equals("bool")) {
                     equalityExpr.getValue().addAll(nextAndExpr.getValue());
-                    labelCounter++;
+                    localLabelCounter++;
                     equalityExpr.getValue().add("pop ebx");
                     equalityExpr.getValue().add("pop edx");
 
                     equalityExpr.getValue().add("cmp edx, 1");
-                    equalityExpr.getValue().add("je L" + labelCounter);
+                    equalityExpr.getValue().add("je L" + localLabelCounter);
                     equalityExpr.getValue().add("cmp ebx, 1");
-                    equalityExpr.getValue().add("je L" + labelCounter);
+                    equalityExpr.getValue().add("je L" + localLabelCounter);
                     equalityExpr.getValue().add("mov eax, 1");
-                    equalityExpr.getValue().add("jmp L" + (labelCounter + 1));
+                    equalityExpr.getValue().add("jmp L" + (localLabelCounter + 1));
 
-                    equalityExpr.getValue().add("L" + (labelCounter) + ":");
+                    equalityExpr.getValue().add("L" + (localLabelCounter) + ":");
                     equalityExpr.getValue().add("mov eax, 0");
 
-                    equalityExpr.getValue().add("L" + (labelCounter + 1) + ":");
+                    equalityExpr.getValue().add("L" + (localLabelCounter + 1) + ":");
                     equalityExpr.getValue().add("push eax");
                     equalityExpr = new Pair<>("bool", equalityExpr.getValue());
-                    labelCounter += 2;
+                    localLabelCounter += 4;
 
                 } else {
                     throw new IllegalArgumentException("Both values must be boolean");
@@ -482,9 +551,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     private String getEqualityOperator(String op){
         switch (op) {
             case "==":
-                return "je";
+                return "je ";
             case "!=":
-                return "jne";
+                return "jne ";
             default:
                 throw new IllegalArgumentException();
         }
@@ -493,6 +562,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     @Override
     public Pair<String, List<String>> visitEqualityExpr(GrammarParser.EqualityExprContext ctx) {
         Pair<String, List<String>> relationExpr = visitRelationExpr(ctx.relationExpr(0));
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
         String operator = "";
         if (ctx.relationExpr().size() > 1)
             for (int i = 1; i < ctx.relationExpr().size(); ++i) {
@@ -501,43 +572,43 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         (relationExpr.getKey().equals("int") || relationExpr.getKey().equals("bool"))) {
                     operator = getEqualityOperator(ctx.getChild(2 * i - 1).getText());
                     relationExpr.getValue().addAll(nextRelationExpr.getValue());
-                    labelCounter++;
+                    localLabelCounter++;
                     relationExpr.getValue().add("pop ebx");
                     relationExpr.getValue().add("pop edx");
 
                     relationExpr.getValue().add("cmp edx, ebx");
-                    relationExpr.getValue().add(operator + " L" + labelCounter);
+                    relationExpr.getValue().add(operator + " L" + localLabelCounter);
                     relationExpr.getValue().add("mov eax, 0");
-                    relationExpr.getValue().add("jmp L" + (labelCounter + 1));
+                    relationExpr.getValue().add("jmp L" + (localLabelCounter + 1));
 
-                    relationExpr.getValue().add("L" + (labelCounter) + ":");
+                    relationExpr.getValue().add("L" + (localLabelCounter) + ":");
                     relationExpr.getValue().add("mov eax, 1");
 
-                    relationExpr.getValue().add("L" + (labelCounter + 1) + ":");
+                    relationExpr.getValue().add("L" + (localLabelCounter + 1) + ":");
                     relationExpr.getValue().add("push eax");
                     relationExpr = new Pair<>("bool", relationExpr.getValue());
-                    labelCounter += 2;
+                    labelCounter += 4;
 
                 } else {
                     if (relationExpr.getKey().equals("string") && nextRelationExpr.getKey().equals("string")) {
                         operator = getEqualityOperator(ctx.getChild(2 * i - 1).getText());
-                        labelCounter++;
+                        localLabelCounter++;
                         relationExpr.getValue().addAll(nextRelationExpr.getValue());
                         relationExpr.getValue().add("call strcmp");
                         relationExpr.getValue().add("add esp, 8");
                         relationExpr.getValue().add("mov ebx, eax");
                         relationExpr.getValue().add("cmp ebx, 0");
-                        relationExpr.getValue().add(operator + "L" + labelCounter);
+                        relationExpr.getValue().add(operator + "L" + localLabelCounter);
                         relationExpr.getValue().add("mov eax, 0");
-                        relationExpr.getValue().add("jmp " + (labelCounter + 1));
+                        relationExpr.getValue().add("jmp " + (localLabelCounter + 1));
 
-                        relationExpr.getValue().add("L" + (labelCounter) + ":");
+                        relationExpr.getValue().add("L" + (localLabelCounter) + ":");
                         relationExpr.getValue().add("mov eax, 1");
 
-                        relationExpr.getValue().add("L" + (labelCounter + 1) + ":");
+                        relationExpr.getValue().add("L" + (localLabelCounter + 1) + ":");
                         relationExpr.getValue().add("push eax");
                         relationExpr = new Pair<>("bool", relationExpr.getValue());
-                        labelCounter += 2;
+                        labelCounter += 4;
                     } else
                         throw new IllegalArgumentException("Both values must be the same type");
                 }
@@ -553,13 +624,13 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     private String getRelationOperator(String op){
         switch (op) {
             case ">=":
-                return "jae";
+                return "jae ";
             case ">":
-                return "ja";
+                return "ja ";
             case "<=":
-                return "jbe";
+                return "jbe ";
             case "<":
-                return "jb";
+                return "jb ";
             default:
                 throw new IllegalArgumentException();
         }
@@ -569,6 +640,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     @Override
     public Pair<String, List<String>> visitRelationExpr(GrammarParser.RelationExprContext ctx) {
         Pair<String, List<String>> additiveExpr = visitAdditiveExpr(ctx.additiveExpr(0));
+        labelCounter += 2;
+        int localLabelCounter = labelCounter + 2;
         if (ctx.additiveExpr().size() > 1)
             for (int i = 1; i < ctx.additiveExpr().size(); ++i) {
                 Pair<String, List<String>> nextAdditiveExpr = visitAdditiveExpr(ctx.additiveExpr(i));
@@ -576,21 +649,21 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         (additiveExpr.getKey().equals("int") || nextAdditiveExpr.getKey().equals("bool"))) {
                     String operator = getRelationOperator(ctx.getChild(2 * i - 1).getText());
                     additiveExpr.getValue().addAll(nextAdditiveExpr.getValue());
-                    labelCounter++;
+                    localLabelCounter++;
                     additiveExpr.getValue().add("pop ebx");
                     additiveExpr.getValue().add("pop edx");
 
                     additiveExpr.getValue().add("cmp edx, ebx");
-                    additiveExpr.getValue().add(operator + " L" + labelCounter);
+                    additiveExpr.getValue().add(operator + " L" + localLabelCounter);
                     additiveExpr.getValue().add("mov eax, 0");
-                    additiveExpr.getValue().add("jmp L" + (labelCounter + 1));
+                    additiveExpr.getValue().add("jmp L" + (localLabelCounter + 1));
 
-                    additiveExpr.getValue().add("L" + (labelCounter) + ":");
+                    additiveExpr.getValue().add("L" + (localLabelCounter) + ":");
                     additiveExpr.getValue().add("mov eax, 1");
 
-                    additiveExpr.getValue().add("L" + (labelCounter + 1) + ":");
+                    additiveExpr.getValue().add("L" + (localLabelCounter + 1) + ":");
                     additiveExpr.getValue().add("push eax");
-                    labelCounter += 2;
+                    labelCounter += 4;
                     additiveExpr = new Pair<>("bool", additiveExpr.getValue());
                 } else {
                     throw new IllegalArgumentException("Both values must be integer or boolean");
@@ -627,7 +700,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     multyplicationExpr.getValue().addAll(nextMultyplicationExpr.getValue());
                     multyplicationExpr.getValue().add("pop ebx");
                     multyplicationExpr.getValue().add("pop edx");
-                    multyplicationExpr.getValue().add(operator + "edx, ebx");
+                    multyplicationExpr.getValue().add(operator + " edx, ebx");
                     multyplicationExpr.getValue().add("mov eax, edx");
                     multyplicationExpr.getValue().add("push eax");
                     multyplicationExpr = new Pair<>("int", multyplicationExpr.getValue());
@@ -642,7 +715,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
                       multyplicationExpr.getValue().add("call strcat");
                       multyplicationExpr.getValue().add("add esp, 8");
-                      multyplicationExpr.getValue().add("mov eax, edx");
                       multyplicationExpr.getValue().add("push eax");
                       multyplicationExpr = new Pair<>("string", multyplicationExpr.getValue());
                   } else {
@@ -770,11 +842,14 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     tmpVarCounter++;
                     String var = ("tmp" + tmpVarCounter);
                     try {
-                        vst.addGlobalVariable(var, "string", 4);
+                        dataSection.add(var + ": dd " + ctx.STRING_LITERAL().getText() + ", 0");
+                        //vst.addGlobalVariable(var, "string", 4);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    //dataSection.add(var + ": dd " + ctx.STRING_LITERAL().getText() + ", 0");
                     code.add("push " + var);
+                    return new Pair<>("string", code);
                 }
             }
         }
@@ -899,10 +974,12 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             bssSection.add(name + ": resb " + type + ".size");
         }
 
+        Pair<String, List<String>> exprRes = null;
+        if (ctx.expression() != null)
+            exprRes = visitExpression(ctx.expression());
 
-
-        if (ctx.getChild(firstBrace).getText().equals("=") && visitExpression(ctx.expression()).getKey().equals(type)){
-            code.addAll(visitExpression(ctx.expression()).getValue());
+        if (ctx.getChild(firstBrace).getText().equals("=") && exprRes.getKey().equals(type)){
+            code.addAll(exprRes.getValue());
             code.add("pop eax");
             try {
                 code.add("mov " + vst.getVariableAddress(name) + ", eax");
@@ -912,11 +989,11 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         } else {
             if (ctx.getChild(firstBrace).getText().equals("(") && ctx.getChild(firstBrace + 2).getText().equals(")")){
                 for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
-                    Pair<String, List<String>> exprRes = visitExpression(ctx.expressionList().expression(i));
+                    Pair<String, List<String>> exprLstRes = visitExpression(ctx.expressionList().expression(i));
                     try {
                         type = vst.getVariableType(name);
-                        if (exprRes.getKey().equals(strStorage.get(type).getFieldType(i))){
-                            code.addAll(exprRes.getValue());
+                        if (exprLstRes.getKey().equals(strStorage.get(type).getFieldType(i))){
+                            code.addAll(exprLstRes.getValue());
                             code.add("pop eax");
                             code.add("mov [" + name + " + " + type + "." +
                                     strStorage.get(type).getFieldName(i) + "], eax");

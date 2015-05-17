@@ -49,28 +49,29 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-je L7
+je  L51
 mov eax, 0
-jmp L8
-L7:
+jmp L52
+L51:
 mov eax, 1
-L8:
+L52:
 push eax
 pop ebx
 pop edx
 cmp edx, 1
-je L10
+je L39
 cmp ebx, 1
-je L10
+je L39
 mov eax, 1
-jmp L11
-L10:
+jmp L40
+L39:
 mov eax, 0
-L11:
+L40:
 push eax
 pop eax
 mov [ebp - 4], eax
 push dword [ebp - 4]
+pop eax
 mov esp, ebp
 pop ebp
 ret
@@ -84,6 +85,53 @@ sub esp, 4
 push 1
 pop eax
 mov [ebp - 4], eax
+push dword [ebp + 8]
+push 0
+pop ebx
+pop edx
+cmp edx, ebx
+ja  L85
+mov eax, 0
+jmp L86
+L85:
+mov eax, 1
+L86:
+push eax
+pop eax
+cmp eax, 1
+jne L79
+L80:
+push dword [ebp + 8]
+push 2
+pop ebx
+pop eax
+mov edx, 0
+idiv ebx
+mov eax, edx
+push eax
+push 1
+pop ebx
+pop edx
+cmp edx, ebx
+je  L101
+mov eax, 0
+jmp L102
+L101:
+mov eax, 1
+L102:
+push eax
+pop eax
+cmp eax, 1
+jne L93
+push dword [ebp - 4]
+push dword [ebp + 12]
+pop ebx
+pop eax
+imul ebx
+push eax
+pop eax
+mov [ebp - 4], eax
+L93:
 push dword [ebp + 12]
 push dword [ebp + 12]
 pop ebx
@@ -101,12 +149,24 @@ idiv ebx
 push eax
 pop eax
 mov [ebp + 8], eax
-push dword [ebp + 12]
 push dword [ebp + 8]
+push 0
 pop ebx
-pop eax
-imul ebx
+pop edx
+cmp edx, ebx
+ja  L141
+mov eax, 0
+jmp L142
+L141:
+mov eax, 1
+L142:
 push eax
+pop eax
+cmp eax, 1
+je L80
+L79:
+push dword [ebp - 4]
+pop eax
 mov esp, ebp
 pop ebp
 ret 8
@@ -116,20 +176,58 @@ ret 8
 main:
 push ebp
 mov ebp, esp
-sub esp, 8
-push 5
+sub esp, 16
+push 2
 pop eax
 mov [ebp - 4], eax
 push 6
 pop eax
 mov [ebp - 8], eax
+push tmp1
+push str_format
+call printf
+add esp, 8
+lea ebx, [ebp - 8]
+push ebx
+push int_format
+call scanf
+add esp, 8
+push tmp2
+push str_format
+call printf
+add esp, 8
+lea ebx, [ebp - 4]
+push ebx
+push int_format
+call scanf
+add esp, 8
 push dword [ebp - 8]
 push dword [ebp - 4]
 call power
 push eax
-push int_format
+push int_formatln
 call printf
+add esp, 8
+push tmp3
+pop eax
+mov [ebp - 12], eax
+push tmp4
+pop eax
+mov [ebp - 16], eax
+push dword [ebp - 12]
+push dword [ebp - 16]
+pop ebx
+pop edx
+push ebx
+push edx
+call strcat
+add esp, 8
+push eax
+;push str_format
+call printf
+add esp, 8
 push 0
+pop eax
 mov esp, ebp
 pop ebp
 ret
@@ -138,10 +236,15 @@ ret
 
 section .data
 int_format dd "%d", 10, 0
+int_formatln db "%d", 10, 0
 str_format dd "%s", 10, 0
 globIntVar: dd 0
 globStringVarWithInit: dd "It is global string", 0
 globBoolVar: dd 0
+tmp1: dd "Enter n: ", 0
+tmp2: dd "Enter k: ", 0
+tmp3: dd "hello, ", 0
+tmp4: db "world!", 10, 0
 
 section .bss
 glob: resd 1
