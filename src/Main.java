@@ -3,6 +3,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,7 +25,18 @@ public class Main {
 
         ParseTree tree = parser.programm();
 
-        List<String> code = new Visitor().visit(tree).getValue();
+        FunctionVisitor fv = new FunctionVisitor();
+        fv.visit(tree);
+
+        Visitor visitor = new Visitor();
+        visitor.setFunctionStorage(fv.getFuncStorage());
+        //ParseTreeWalker treeWalker = new ParseTreeWalker();
+        //заимплементить ParseTreeListener
+        //ParseTreeListener listener = new ParseTreeListener(parser);
+        //treeWalker.walk(listener, tree);
+
+        //List<String> code = new Visitor().visit(tree).getValue();
+        List<String> code = visitor.visit(tree).getValue();
         for (String line : code) {
             out.println(line);
             System.out.println(line);

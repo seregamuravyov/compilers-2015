@@ -14,6 +14,22 @@ endstruc
 
 
 
+struc point
+.x RESD 1
+.y RESD 1
+.size:
+endstruc
+
+
+
+struc vector
+.a RESB point.size
+.b RESB point.size
+.size:
+endstruc
+
+
+
 section .text
 global main
 
@@ -21,15 +37,71 @@ doNothing:
 push ebp
 mov ebp, esp
 sub esp, 0
-push 1
+mov edx, [ebp + 8]
+mov [p_doNothing_1], edx
+push dword [p_doNothing_1]
 pop eax
-mov [l + firstClass.flag], eax
-push 5
-pop eax
-mov [l + firstClass.num], eax
+mov [l_doNothing_1], eax
 mov esp, ebp
 pop ebp
-ret
+ret 4
+
+
+
+getSqDistance:
+push ebp
+mov ebp, esp
+sub esp, 4
+mov edx, [ebp + 8]
+mov [v_getSqDistance_2], edx
+push dword [v_getSqDistance_2 + vector.a + point.x]
+push dword [v_getSqDistance_2 + vector.b + point.x]
+pop ebx
+pop edx
+sub edx, ebx
+mov eax, edx
+push eax
+push dword [v_getSqDistance_2 + vector.a + point.x]
+push dword [v_getSqDistance_2 + vector.b + point.x]
+pop ebx
+pop edx
+sub edx, ebx
+mov eax, edx
+push eax
+pop ebx
+pop eax
+imul ebx
+push eax
+push dword [v_getSqDistance_2 + vector.a + point.y]
+push dword [v_getSqDistance_2 + vector.b + point.y]
+pop ebx
+pop edx
+sub edx, ebx
+mov eax, edx
+push eax
+push dword [v_getSqDistance_2 + vector.a + point.y]
+push dword [v_getSqDistance_2 + vector.b + point.y]
+pop ebx
+pop edx
+sub edx, ebx
+mov eax, edx
+push eax
+pop ebx
+pop eax
+imul ebx
+push eax
+pop ebx
+pop edx
+add edx, ebx
+mov eax, edx
+push eax
+pop eax
+mov [ebp - 4], eax
+push dword [ebp - 4]
+pop eax
+mov esp, ebp
+pop ebp
+ret 4
 
 
 
@@ -39,34 +111,78 @@ mov ebp, esp
 sub esp, 4
 push 0
 pop eax
-mov [t + firstClass.flag], eax
+mov [t_getBean_3 + firstClass.flag], eax
 push 6
 pop eax
-mov [t + firstClass.num], eax
-push dword [t + firstClass.flag]
+mov [t_getBean_3 + firstClass.num], eax
+push dword [t_getBean_3 + firstClass.flag]
 push dword [globIntVar]
 push 0
 pop ebx
 pop edx
 cmp edx, ebx
-je  L51
+je  L91
 mov eax, 0
-jmp L52
-L51:
+jmp L92
+L91:
 mov eax, 1
-L52:
+L92:
 push eax
 pop ebx
 pop edx
 cmp edx, 1
-je L39
+je L79
 cmp ebx, 1
-je L39
+je L79
 mov eax, 1
-jmp L40
-L39:
+jmp L80
+L79:
 mov eax, 0
-L40:
+L80:
+push eax
+pop eax
+mov [ebp - 4], eax
+push dword [t_getBean_3]
+pop eax
+mov esp, ebp
+pop ebp
+ret
+
+
+
+main:
+push ebp
+mov ebp, esp
+sub esp, 20
+push 5
+pop eax
+mov [globIntVar], eax
+call getBean
+push eax
+pop eax
+mov [c_main_4], eax
+push dword [c_main_4]
+call doNothing
+push 0
+pop eax
+mov [x_main_4 + point.y], eax
+push 0
+pop eax
+mov [x_main_4 + point.x], eax
+push 5
+pop eax
+mov [y_main_4 + point.y], eax
+push 5
+pop eax
+mov [y_main_4 + point.x], eax
+push dword [x_main_4]
+pop eax
+mov [v_main_4 + vector.b], eax
+push dword [y_main_4]
+pop eax
+mov [v_main_4 + vector.a], eax
+push dword [v_main_4]
+call getSqDistance
 push eax
 pop eax
 mov [ebp - 4], eax
@@ -74,7 +190,73 @@ push dword [ebp - 4]
 push int_format
 call printf
 add esp, 8
-push dword [ebp - 4]
+push 2
+pop eax
+mov [ebp - 8], eax
+push 6
+pop eax
+mov [ebp - 12], eax
+push tmp1
+push str_format
+call printf
+add esp, 8
+lea ebx, [ebp - 12]
+push ebx
+push int_format
+call scanf
+add esp, 8
+push tmp2
+push str_format
+call printf
+add esp, 8
+lea ebx, [ebp - 8]
+push ebx
+push int_format
+call scanf
+add esp, 8
+push dword [ebp - 12]
+push dword [ebp - 8]
+call power
+push eax
+push int_format
+call printf
+add esp, 8
+push tmp3
+pop eax
+mov [ebp - 16], eax
+push tmp4
+pop eax
+mov [ebp - 20], eax
+push dword [ebp - 16]
+push dword [ebp - 20]
+call strcmp
+add esp, 8
+mov ebx, eax
+cmp ebx, 0
+jne L311
+mov eax, 0
+jmp 312
+L311:
+mov eax, 1
+L312:
+push eax
+pop eax
+cmp eax, 1
+jne L303
+push dword [ebp - 16]
+push dword [ebp - 20]
+pop ebx
+pop edx
+push ebx
+push edx
+call strcat
+add esp, 8
+push eax
+push str_format
+call printf
+add esp, 8
+L303:
+push 0
 pop eax
 mov esp, ebp
 pop ebp
@@ -94,17 +276,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L93
+ja  L353
 mov eax, 0
-jmp L94
-L93:
+jmp L354
+L353:
 mov eax, 1
-L94:
+L354:
 push eax
 pop eax
 cmp eax, 1
-jne L87
-L88:
+jne L347
+L348:
 push dword [ebp + 8]
 push 2
 pop ebx
@@ -117,16 +299,16 @@ push 1
 pop ebx
 pop edx
 cmp edx, ebx
-je  L109
+je  L369
 mov eax, 0
-jmp L110
-L109:
+jmp L370
+L369:
 mov eax, 1
-L110:
+L370:
 push eax
 pop eax
 cmp eax, 1
-jne L101
+jne L361
 push dword [ebp - 4]
 push dword [ebp + 12]
 pop ebx
@@ -135,7 +317,7 @@ imul ebx
 push eax
 pop eax
 mov [ebp - 4], eax
-L101:
+L361:
 push dword [ebp + 12]
 push dword [ebp + 12]
 pop ebx
@@ -158,101 +340,22 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L149
+ja  L409
 mov eax, 0
-jmp L150
-L149:
+jmp L410
+L409:
 mov eax, 1
-L150:
+L410:
 push eax
 pop eax
 cmp eax, 1
-je L88
-L87:
+je L348
+L347:
 push dword [ebp - 4]
 pop eax
 mov esp, ebp
 pop ebp
 ret 8
-
-
-
-main:
-push ebp
-mov ebp, esp
-sub esp, 16
-call getBean
-push 2
-pop eax
-mov [ebp - 4], eax
-push 6
-pop eax
-mov [ebp - 8], eax
-push tmp1
-push str_format
-call printf
-add esp, 8
-lea ebx, [ebp - 8]
-push ebx
-push int_format
-call scanf
-add esp, 8
-push tmp2
-push str_format
-call printf
-add esp, 8
-lea ebx, [ebp - 4]
-push ebx
-push int_format
-call scanf
-add esp, 8
-push dword [ebp - 8]
-push dword [ebp - 4]
-call power
-push eax
-push int_format
-call printf
-add esp, 8
-push tmp3
-pop eax
-mov [ebp - 12], eax
-push tmp4
-pop eax
-mov [ebp - 16], eax
-push dword [ebp - 12]
-push dword [ebp - 16]
-call strcmp
-add esp, 8
-mov ebx, eax
-cmp ebx, 0
-jne L265
-mov eax, 0
-jmp 266
-L265:
-mov eax, 1
-L266:
-push eax
-pop eax
-cmp eax, 1
-jne L257
-push dword [ebp - 12]
-push dword [ebp - 16]
-pop ebx
-pop edx
-push ebx
-push edx
-call strcat
-add esp, 8
-push eax
-push str_format
-call printf
-add esp, 8
-L257:
-push 0
-pop eax
-mov esp, ebp
-pop ebp
-ret
 
 
 
@@ -270,5 +373,11 @@ tmp4: dd "motherfuckers!", 0
 section .bss
 glob: resd 1
 motherfucker: resb firstClass.size
-l: resb firstClass.size
-t: resb firstClass.size
+p_doNothing_1: resb firstClass.size
+l_doNothing_1: resb firstClass.size
+v_getSqDistance_2: resb vector.size
+t_getBean_3: resb firstClass.size
+c_main_4: resb firstClass.size
+x_main_4: resb point.size
+y_main_4: resb point.size
+v_main_4: resb vector.size

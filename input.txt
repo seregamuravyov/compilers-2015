@@ -13,35 +13,49 @@ struct firstClass {
 }
 
 // void function
-void doNothing () {
-    firstClass l(5, true);
+void doNothing (firstClass p) {
+    firstClass l = p;
+}
+
+struct point {
+    int x;
+    int y;
+}
+
+struct vector {
+    point a;
+    point b;
+}
+
+int getSqDistance(vector v) {
+    int res = (v.a.x - v.b.x)*(v.a.x - v.b.x) + (v.a.y - v.b.y)*(v.a.y - v.b.y);
+    return res;
 }
 
 
 // Union example
-bool getBean () {
-    //union {int r, int l};
+firstClass getBean () {
     firstClass t(6, false);
     bool result = t.flag && (globIntVar == 0);
-    write(result);
-    return result;
-}
-
-// power example
-int power (int k, int n) {
-    int r = 1;
-    while (k > 0) {
-        if (k % 2 == 1) {
-            r = r * n;
-        }
-        n = n * n;
-        k = k / 2;
-    }
-    return r;
+    //write(result);
+    return t;
 }
 
 int main(){
-    getBean();
+    globIntVar = 5;
+
+    firstClass c = getBean();
+    //write(c.num);
+
+    doNothing(c);
+
+    point x(0, 0);
+    point y(5, 5);
+
+    vector v(y, x);
+    int dist = getSqDistance(v);
+    write(dist);
+
     int k = 2;
     int n = 6;
     write("Enter n: ");
@@ -55,4 +69,17 @@ int main(){
         write(s + t);
     }
     return 0;
+}
+
+// power example
+int power (int k, int n) {
+    int r = 1;
+    while (k > 0) {
+        if (k % 2 == 1) {
+            r = r * n;
+        }
+        n = n * n;
+        k = k / 2;
+    }
+    return r;
 }

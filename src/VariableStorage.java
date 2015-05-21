@@ -22,8 +22,9 @@ public class VariableStorage {
     public void addGlobalVariable(String name, String type, int size) throws Exception {
         if (!containsVariable(name)){
             if (!(type.equals("int") || type.equals("string") || type.equals("bool")))
-                name = name + "_" + functionName + "_" + getBlockCount();
-            storage.get(0).put(name, new Pair<>(type, "[" + name + "]"));
+                storage.get(0).put((name + "_" + functionName + "_" + getBlockCount()), new Pair<>(type, "[" + name + "_" + functionName + "_" + getBlockCount() + "]"));
+            else
+                storage.get(0).put(name, new Pair<>(type, "[" + name + "]"));
         }
         else
             throw new Exception("Redefenition of variable " + name);
@@ -40,7 +41,11 @@ public class VariableStorage {
 
     public void addFuncArgument(String name, String type, String address) throws Exception {
         if (!containsVariable(name)) {
-            storage.peek().put(name, new Pair<>(type, address));
+            if (!(type.equals("int") || type.equals("bool") || type.equals("string"))){
+                storage.get(0).put(getStructName(name), new Pair<>(type, address));
+            } else {
+                storage.peek().put(name, new Pair<>(type, address));
+            }
         } else {
             throw new Exception("Redefenition of variable " + name);
         }
@@ -76,7 +81,7 @@ public class VariableStorage {
         if (storage.get(0).containsKey(name))
             return storage.get(0).get(name).getKey();
 
-        throw new Exception("No variable with name" +  name + "found in current scope");
+        throw new Exception("No variable with name: " +  name + " found in current scope");
     }
 
     public String getVariableAddress(String name) throws Exception {
@@ -97,5 +102,10 @@ public class VariableStorage {
 
     public int getBlockCount() {
         return blockCount;
+    }
+
+    public String getStructName(String name){
+        String r = name + "_" + functionName + "_" + blockCount;
+        return r;
     }
 }

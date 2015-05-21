@@ -31,6 +31,10 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         return datatypeSize.get(s);
     }
 
+    public void setFunctionStorage(Map<String, FunctionStorage> st){
+        funcStorage = st;
+    }
+
     public Pair<String, List<String>> visitProgramm(@NotNull GrammarParser.ProgrammContext ctx) {
         labelCounter = 0;
         tmpVarCounter = 0;
@@ -77,6 +81,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
     public Pair<String, List<String>> visitFunctionDefinition(@NotNull GrammarParser.FunctionDefinitionContext ctx) {
         List<String> code = new ArrayList<String>();
+        List<String> assignArg = new ArrayList<>();
 
         String returnType = visitFunctionReturnType(ctx.functionReturnType()).getKey();
         String functionName = ctx.IDENTIFIER().getText();
@@ -92,12 +97,32 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 for (int i = 0; i < ctx.variableList().typeSpecifier().size(); i++) {
                     String argType = visitTypeSpecifier(ctx.variableList().typeSpecifier(i)).getKey();
                     String argName = ctx.variableList().IDENTIFIER(i).getText();
-                    fs.addArgument(argName, argType, getDatatypeSize(argType));
-                    try {
-                        vst.addFuncArgument(argName, fs.getArgType(argName), fs.getArgAdress(argName));
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                    if (!(argType.equals("int") || argType.equals("bool") || argType.equals("string"))){
+                        fs.addArgument(argName, argType, getDatatypeSize(argType));
+                        bssSection.add(vst.getStructName(argName) + ": resb " + argType + ".size");
+                        try {
+                            assignArg.add("mov edx, " + fs.getArgAdress(argName) );
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        assignArg.add("mov [" + vst.getStructName(argName) + "], edx" );
+
+                        try {
+                            vst.addFuncArgument(argName, fs.getArgType(argName), "[" + vst.getStructName(argName) + "]");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        fs.addArgument(argName, argType, getDatatypeSize(argType));
+                        try {
+                            vst.addFuncArgument(argName, fs.getArgType(argName), fs.getArgAdress(argName));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
+
+
                     totalArgStackSize += getDatatypeSize(visitTypeSpecifier(ctx.variableList().typeSpecifier(i)).getKey());
                 }
             }
@@ -109,6 +134,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 throw new IllegalArgumentException("Function type and return type does not match");
             }
             code.add("sub esp, " + String.valueOf(vst.getLocalVarStackSize()));
+            code.addAll(assignArg);
             code.addAll(body.getValue());
 
             vst.exitBlock();
@@ -172,7 +198,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         if (datatypeSize.containsKey(structType)){
             return new Pair<String, List<String>>(structType, null);
         }
-        throw new UnsupportedOperationException("Unknown type" + structType);
+        throw new UnsupportedOperationException("Unknown type " + structType);
     }
 
     public Pair<String, List<String>> visitPrimitiveTypeSpecifier(GrammarParser.PrimitiveTypeSpecifierContext ctx) {
@@ -231,7 +257,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         }
         String structType = (((GrammarParser.StructDefinitionContext) ctx.getParent())).IDENTIFIER().getText();
         strStorage.put(structType, str);
-        datatypeSize.put(structType, str.getStructSize());
+        datatypeSize.put(structType, 4);
         return new Pair<String, List<String>>(structType, code);
     }
 
@@ -427,7 +453,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         String type = "", field = "";
         String adress = "";
         if(vst.containsVariable(name)){
-            adress += name;
+            //name = ;
+
+            adress += vst.getStructName(name);
 
             for(int i = 1; i < ctx.IDENTIFIER().size(); i++) {
                 if (i == 1) {
@@ -792,9 +820,13 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 code.add("push eax");
                 return new Pair<>(visitFunctionCall(ctx.functionCall()).getKey(), code);
             } else {
+                //Boolean c = vst.containsVariable(ctx.IDENTIFIER().getText());
+
                 if (ctx.IDENTIFIER() != null &&  vst.containsVariable(ctx.IDENTIFIER().getText())) {
                     try {
                         String var = ctx.IDENTIFIER().getText();
+                        String type = vst.getVariableType(var);
+                        //if (!(type.equals("int") || type.equals("bool") || type.equals("string")))
                         code.add("push dword " + vst.getVariableAddress(var));
                         return new Pair<>(vst.getVariableType(var), code);
                     } catch (Exception e) {
@@ -816,7 +848,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         }
-        throw new IllegalArgumentException("Not supported type!");
+        throw new IllegalArgumentException("Not supported type!" + ctx.getText());
     }
 
     private String getBooleanValue(String s){
@@ -974,7 +1006,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         }
 
         if (!(type.equals("int") || type.equals("bool") || type.equals("string"))) {
-            bssSection.add(name + ": resb " + type + ".size");
+            //name = vst.getStructName(name);
+            bssSection.add(vst.getStructName(name) + ": resb " + type + ".size");
         }
 
         Pair<String, List<String>> exprRes = null;
@@ -998,7 +1031,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         if (exprLstRes.getKey().equals(strStorage.get(type).getFieldType(i))){
                             code.addAll(exprLstRes.getValue());
                             code.add("pop eax");
-                            code.add("mov [" + name + " + " + type + "." +
+                            code.add("mov [" + vst.getStructName(name) + " + " + type + "." +
                                     strStorage.get(type).getFieldName(i) + "], eax");
                         }
                         else

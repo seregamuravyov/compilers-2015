@@ -47,9 +47,9 @@ structFieldDeclaration
 
 statement
 	: compoundStatement
+	| functionCall ';'
 	| conditionStatement
 	| localAssignment ';'
-    | functionCall ';'
     | localVariableDeclaration ';'
     | unionStatement ';'
     | whileStatement
