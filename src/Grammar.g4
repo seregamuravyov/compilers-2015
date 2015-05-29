@@ -73,9 +73,9 @@ whileStatement
 	;
 
 functionCall
-    : IDENTIFIER '(' expressionList? ')'
-    | WRITE '(' expression ')'
+    : WRITE '(' expression ')'
     | READ '(' IDENTIFIER ')'
+    | IDENTIFIER '(' expressionList? ')'
     ;
 
 structCall
@@ -139,6 +139,7 @@ globalAssignment
 localAssignment
 	: (typeSpecifier)? IDENTIFIER '=' expression
 	| (typeSpecifier)? IDENTIFIER '(' expressionList ')'
+	| structCall '=' expression
 	;
 
 localVariableDeclaration

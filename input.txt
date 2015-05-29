@@ -3,9 +3,15 @@
 // Global vars
 int globIntVar = 0;
 string globStringVarWithInit = "It is global string";
+string globalStr;
 bool globBoolVar = false;
 int glob;
 firstClass motherfucker;
+
+struct map {
+    int index;
+    string value;
+}
 
 struct firstClass {
      int num;
@@ -14,7 +20,19 @@ struct firstClass {
 
 // void function
 void doNothing (firstClass p) {
+    write(p.num);
     firstClass l = p;
+    l.num = 1488;
+    write(p.num);
+    write(l.num);
+
+}
+
+int recurse (int i) {
+    if (i < 20) {
+        i = recurse(i + 1);
+    }
+    return i;
 }
 
 struct point {
@@ -27,8 +45,20 @@ struct vector {
     point b;
 }
 
+struct dvector {
+    vector v1;
+    vector v2;
+}
+
 int getSqDistance(vector v) {
     int res = (v.a.x - v.b.x)*(v.a.x - v.b.x) + (v.a.y - v.b.y)*(v.a.y - v.b.y);
+
+    write(" v.a.x - v.b.x = ");
+    write(v.a.x - v.b.x);
+    write(" v.a.y - v.b.y ");
+    write(v.a.y - v.b.y);
+    write(" ");
+
     return res;
 }
 
@@ -37,36 +67,146 @@ int getSqDistance(vector v) {
 firstClass getBean () {
     firstClass t(6, false);
     bool result = t.flag && (globIntVar == 0);
-    //write(result);
+    if (result)
+    {
+        write(t.flag);
+    }
+    else
+    {
+        write(t.num);
+    }
     return t;
+}
+
+string strread(){
+    string s;
+    read(s);
+    //write(s);
+    return s;
 }
 
 int main(){
     globIntVar = 5;
+    globalStr = "lol";
+
+    //int a;
+    //a = 0;
+    //write(a);
+
+    firstClass fk(23, true);
+    motherfucker = fk;
+
+    write("motherfucker.num = ");
+    write(motherfucker.num);
+    write(" ");
+
+    string exp = "lolka";
+
+    map new(1, exp);
+    //new.index = 1;
+    string salom = "parhatie";
+    string strp = new.value + ", salam";
+    new.value = salom;
+    salom = salom + ", fuckers!!!!!!!"
+    //string tmp;
+    //read(tmp);
+    //new.value = tmp;
+    write(salom);
+    write(new.value);
 
     firstClass c = getBean();
-    //write(c.num);
+    write(c.num + 6);
+    write(" ");
+
+    write(globStringVarWithInit);
+    read(globStringVarWithInit);
+    write(globStringVarWithInit);
+
+    string sk = strread();
+    string b = strread();
+    string teon = strread();
+
+    //read(sk);
+    //read(b);
+    //read(teon);
+
+    //string j = sk + b + teon;
+    //write(sk + b + teon);
+
+
+    //string xk = strread();
+    //write(xk);
+
+    //write(recurse(10));
 
     doNothing(c);
+    write(" ");
+    write(c.num);
+    write(" ");
 
     point x(0, 0);
-    point y(5, 5);
+    point y(3, 4);
+    point zed(6, 6);
+
+    write("x.y = ");
+    write(x.y);
+    write(" ");
+
+    write("y.y = ");
+    write(y.y);
+    write(" ");
 
     vector v(y, x);
+    vector z(x, y);
+
+    dvector dv(v, z);
+
+    zed = v.a;
+    dv.v2.b = zed;
+
+    write("zed.x = ");
+    write(zed.x);
+    write(" ");
+
+    write("zed.y = ");
+    write(zed.y);
+    write(" ");
+
+
+    //v.a = z;
+    //write(v.a.x);
+    //write(" ");
+    //write(" v.a.x = ");
+    //write(v.a.x);
+    //write(" v.a.y = ");
+    //write(v.a.y);
+
+    //write(" v.b.x = ");
+    //write(v.b.x);
+    //write(" v.b.y = ");
+    //write(v.b.y);
+
     int dist = getSqDistance(v);
+    write("dist = ");
     write(dist);
 
+    //string s = sk;
+    //string t = teon;
+    //write(" " + s + t + " ");
+
     int k = 2;
-    int n = 6;
+    int n = 10;
     write("Enter n: ");
     read(n);
     write("Enter k: ");
     read(k);
+
     write(power(k, n));
-    string s = "hello, ";
-    string t = "motherfuckers!";
+
+    string s = "  hello, ";
+    string t = "for all the world!  ";
     if (s != t){
-        write(s + t);
+          write(s + t);
     }
     return 0;
 }

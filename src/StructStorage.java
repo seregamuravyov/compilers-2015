@@ -34,7 +34,7 @@ public class StructStorage {
         structSize += size;
     }
 
-    public String getFieldType(String fieldName) throws Exception {
+    public String getFieldTypeStr(String fieldName) throws Exception {
         if (containsArg(fieldName)) {
             return fields.get(fieldName);
         }
@@ -51,6 +51,10 @@ public class StructStorage {
 
     public int getStructSize(){
         return structSize;
+    }
+
+    public List<Pair<String, String>> getFieldsLst() {
+        return fieldsLst;
     }
 
 }

@@ -19,6 +19,7 @@ public class FunctionVisitor extends GrammarBaseVisitor<String> {
     public Map<String, FunctionStorage> getFuncStorage(){
         return funcStorage;
     }
+
     @Override
     public String visitProgramm(GrammarParser.ProgrammContext ctx) {
         datatypeSize.put("int", 4);
