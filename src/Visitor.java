@@ -89,7 +89,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         code.add("mov esp, ebp\npop ebp");
         code.add("ret\n\n");
 
-
+        vst.setStructStorage(strStorage);
         for (GrammarParser.FunctionDefinitionContext fdc : ctx.functionDefinition()) {
             code.addAll(visitFunctionDefinition(fdc).getValue());
             code.add("\n\n");
@@ -1331,7 +1331,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        vst.setAllocated(name);
+                        //vst.setAllocated(name);
                     }
                 }
 
@@ -1346,10 +1346,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
                 else {
 
-                    code.addAll(exprRes.getValue());
-                    code.add("pop eax");
-
                     if (type.equals("string")) {
+                        code.addAll(exprRes.getValue());
+                        code.add("pop eax");
                         try {
                             if(strAssign && !vst.isAllocated(name)) {
                                 code.add("pusha");
@@ -1385,14 +1384,20 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
                     } else {
                         try {
-                            if (ctx.getText().contains(".")){
+                            //if (ctx.getText().contains(".")){
                                 structToVarAss = true;
                                 exprRes = visitExpression(ctx.expression());
                                 structToVarAss = false;
 
-                                String localAddr = exprRes.getValue().get(exprRes.getValue().size()- 1);
+                                String localAddr = "";
 
-                                code.addAll(exprRes.getValue().subList(0, 2));
+                                if (ctx.getText().contains(".")) {
+                                    localAddr = exprRes.getValue().get(exprRes.getValue().size() - 1);
+                                    code.addAll(exprRes.getValue().subList(0, 2));
+                                } else {
+                                    code.addAll(exprRes.getValue());
+                                }
+
                                 code.add("pop eax");
 
                                 List<String> casualAssignment = new ArrayList<>();
@@ -1401,19 +1406,19 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                                         "mov [ecx ", casualAssignment, vst.isAllocated(name)));
                                 isStructCall = false;
                                 vst.setAllocated(name);
-                            } else {
-                                code.addAll(exprRes.getValue());
-                                code.add("pop eax");
-
-                                code.add("pusha");
-                                code.add("push " + getDatatypeSize(type));
-                                code.add("push eax");
-                                code.add("push dword " + vst.getVariableAddress(name));
-                                code.add("call memcpy");
-                                code.add("add esp, 12");
-                                code.add("popa");
-                            }
-                            code.add("mov ecx, " + vst.getVariableAddress(name));
+//                            } else {
+//                                code.addAll(exprRes.getValue());
+//                                code.add("pop eax");
+//
+//                                code.add("pusha");
+//                                code.add("push " + getDatatypeSize(type));
+//                                code.add("push eax");
+//                                code.add("push dword " + vst.getVariableAddress(name));
+//                                code.add("call memcpy");
+//                                code.add("add esp, 12");
+//                                code.add("popa");
+//                            }
+                            //code.add("mov ecx, " + vst.getVariableAddress(name));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

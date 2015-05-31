@@ -7,9 +7,14 @@ import java.util.*;
  */
 public class VariableStorage {
     public Stack<Map<String, VariableDescription>> storage;
+    private Map<String, StructStorage> strStorage;
     String functionName;
     int shift = 0;
     int blockCount = 0;
+
+    public void setStructStorage(Map<String, StructStorage> strStorage){
+        this.strStorage = strStorage;
+    }
 
     public VariableStorage(){
         storage = new Stack<>();
@@ -83,16 +88,55 @@ public class VariableStorage {
         return shift;
     }
 
+    private List<String> cleanStructuresByFields(String type, String sourse, String sourseAdress, List<String> code, Boolean assignFlag){
+        StructStorage structStr = strStorage.get(type);
+        if (assignFlag) {
+            for (Pair<String, String> j : structStr.getFieldsLst()) {
+                if (j.getValue().equals("string")){
+                    code.add("mov ecx, " + sourseAdress);
+                    code.add(sourse + " + " + type  + "." + j.getKey() + "]");
+                    code.add("pusha");
+                    code.add("push edx");
+                    code.add("call free");
+                    code.add("add esp, 4");
+                    code.add("popa");
+
+                } else {
+                    if (!(j.getValue().equals("int") || j.getValue().equals("bool"))) {
+                        List<String> assignCode = new ArrayList<>();
+                        code.addAll(cleanStructuresByFields(j.getValue(), sourse + " + " + type + "." + j.getKey(),
+                                sourseAdress, assignCode, assignFlag));
+                    }
+                }
+            }
+            return code;
+        } else {
+            throw new UnsupportedOperationException("Can't clear uninitialized struct!");
+        }
+    }
+
     public List<String> garbageCollector(){
         List<String> code = new ArrayList<>();
         for (VariableDescription i : storage.peek().values()) {
             if (!(i.getType().equals("bool")) && !(i.getType().equals("int"))
                     && i.getAdress().startsWith("[ebp -")) {
-                code.add("pusha");
-                code.add("push dword " + i.getAdress());
-                code.add("call free");
-                code.add("add esp, 4");
-                code.add("popa");
+                if (i.getType().equals("string")) {
+                    code.add("pusha");
+                    code.add("push dword " + i.getAdress());
+                    code.add("call free");
+                    code.add("add esp, 4");
+                    code.add("popa");
+                } else {
+
+                    List<String> local = new ArrayList<>();
+                    code.addAll(cleanStructuresByFields(i.getType(), "mov edx, [ecx ", i.getAdress(), local, i.getIsAllocated()));
+
+                    code.add("pusha");
+                    code.add("push dword " + i.getAdress());
+                    code.add("call free");
+                    code.add("add esp, 4");
+                    code.add("popa");
+                }
             }
         }
         return code;
