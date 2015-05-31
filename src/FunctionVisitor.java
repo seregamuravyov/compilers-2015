@@ -199,11 +199,6 @@ public class FunctionVisitor extends GrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitIndex(GrammarParser.IndexContext ctx) {
-        return super.visitIndex(ctx);
-    }
-
-    @Override
     public String visitGlobalVariableDeclaration(GrammarParser.GlobalVariableDeclarationContext ctx) {
         return super.visitGlobalVariableDeclaration(ctx);
     }

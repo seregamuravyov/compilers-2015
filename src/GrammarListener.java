@@ -278,16 +278,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitPrimitiveExpr(GrammarParser.PrimitiveExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#index}.
-	 * @param ctx the parse tree
-	 */
-	void enterIndex(GrammarParser.IndexContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#index}.
-	 * @param ctx the parse tree
-	 */
-	void exitIndex(GrammarParser.IndexContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link GrammarParser#globalVariableDeclaration}.
 	 * @param ctx the parse tree
 	 */

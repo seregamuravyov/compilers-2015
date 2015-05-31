@@ -51,7 +51,6 @@ statement
 	| conditionStatement
 	| localAssignment ';'
     | localVariableDeclaration ';'
-    | unionStatement ';'
     | whileStatement
 	;
 
@@ -111,9 +110,9 @@ multyplicationExpr
   ;
 
 atomicExpr
-  :  functionCall index?
+  :  functionCall
   |  structCall
-  |  IDENTIFIER index?
+  |  IDENTIFIER
   |  primitiveExpr
   |  '(' expression ')'
   ;
@@ -124,16 +123,13 @@ primitiveExpr
   |  BOOL_LITERAL
   ;
 
-index
-  :  '[' expression ']'
-  ;
-
 globalVariableDeclaration
     : typeSpecifier  globalAssignment (',' globalAssignment)* ';'
     ;
 
 globalAssignment
     : IDENTIFIER ('=' primitiveExpr)?
+    | IDENTIFIER ('(' expressionList ')')?
     ;
 
 localAssignment

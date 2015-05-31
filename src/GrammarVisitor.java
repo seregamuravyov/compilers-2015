@@ -173,12 +173,6 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimitiveExpr(GrammarParser.PrimitiveExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GrammarParser#index}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIndex(GrammarParser.IndexContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link GrammarParser#globalVariableDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

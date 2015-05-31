@@ -283,16 +283,6 @@ public class Listener extends GrammarBaseListener {
     }
 
     @Override
-    public void enterIndex(GrammarParser.IndexContext ctx) {
-        super.enterIndex(ctx);
-    }
-
-    @Override
-    public void exitIndex(GrammarParser.IndexContext ctx) {
-        super.exitIndex(ctx);
-    }
-
-    @Override
     public void enterGlobalVariableDeclaration(GrammarParser.GlobalVariableDeclarationContext ctx) {
         super.enterGlobalVariableDeclaration(ctx);
     }

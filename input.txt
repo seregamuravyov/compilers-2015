@@ -6,11 +6,16 @@ string globStringVarWithInit = "It is global string";
 string globalStr;
 bool globBoolVar = false;
 int glob;
-firstClass motherfucker;
+firstClass motherfucker(1488, true);
 
 struct map {
     int index;
     string value;
+}
+
+struct vecmap {
+    map x1;
+    map x2;
 }
 
 struct firstClass {
@@ -52,13 +57,6 @@ struct dvector {
 
 int getSqDistance(vector v) {
     int res = (v.a.x - v.b.x)*(v.a.x - v.b.x) + (v.a.y - v.b.y)*(v.a.y - v.b.y);
-
-    write(" v.a.x - v.b.x = ");
-    write(v.a.x - v.b.x);
-    write(" v.a.y - v.b.y ");
-    write(v.a.y - v.b.y);
-    write(" ");
-
     return res;
 }
 
@@ -86,128 +84,93 @@ string strread(){
 }
 
 int main(){
-    globIntVar = 5;
-    globalStr = "lol";
 
-    //int a;
-    //a = 0;
-    //write(a);
+    // + проверка инициализации структур
+    // + запись строк по значению в структуры
+    // очистка строк внутри структуры
+    // + запрет обращений к полям, если отсутствует инициализация структуры
+    // + присваивание глобально объявленных структур
+    // присваивание полей структур полям структур v.a = t.b
 
-    firstClass fk(23, true);
-    motherfucker = fk;
+    //string s = "hello";
+    //string t;
+    //t = s;
+    //s = t + " lol"; - течёт, через флаг закрыть
+    //m.value = s;
 
-    write("motherfucker.num = ");
     write(motherfucker.num);
     write(" ");
-
-    string exp = "lolka";
-
-    map new(1, exp);
-    //new.index = 1;
-    string salom = "parhatie";
-    string strp = new.value + ", salam";
-    new.value = salom;
-    salom = salom + ", fuckers!!!!!!!"
-    //string tmp;
-    //read(tmp);
-    //new.value = tmp;
-    write(salom);
-    write(new.value);
-
-    firstClass c = getBean();
-    write(c.num + 6);
+    write(motherfucker.flag);
     write(" ");
 
-    write(globStringVarWithInit);
-    read(globStringVarWithInit);
-    write(globStringVarWithInit);
+    motherfucker.num = 2;
+    motherfucker.flag = false;
 
-    string sk = strread();
-    string b = strread();
-    string teon = strread();
-
-    //read(sk);
-    //read(b);
-    //read(teon);
-
-    //string j = sk + b + teon;
-    //write(sk + b + teon);
-
-
-    //string xk = strread();
-    //write(xk);
-
-    //write(recurse(10));
-
-    doNothing(c);
+    write(motherfucker.num);
     write(" ");
-    write(c.num);
+    write(motherfucker.flag);
     write(" ");
+
+    //string s = "hello, dear!";
+    //map m(1, "Privet");
+    //map nn(2, m.value + " salam ");
+    //vecmap vm(m, nn);
+
+    //m.value = m.value + " bitch";
+    //nn.value = nn.value + " suka";
+    //write("vm.x1.value = ");
+    //write(vm.x1.value);
+
+   // write(" 1. vm.x2.value = ");
+    //write(vm.x2.value);
+
+    //vm.x2 = m;
+
+    //write(" 2.vm.x2.value = ");
+    //write(vm.x2.value);
+
+
+    //write("1. m.value = ");
+    //write(m.value);
+    //s = s + " lenta " + s;
+
+    //write(" s = ");
+    //write(s);
+    //m.value = m.value + s;
+
+    //write("2. m.value = ");
+    //write(m.value);
+
+    //m.value = s;
+
+    //write(" 3. m.value = ");
+    //write(m.value);
 
     point x(0, 0);
     point y(3, 4);
-    point zed(6, 6);
 
-    write("x.y = ");
-    write(x.y);
-    write(" ");
+    point z;
 
-    write("y.y = ");
-    write(y.y);
-    write(" ");
+    vector v(y, x );
 
-    vector v(y, x);
-    vector z(x, y);
+    z = v.a;
+    v.b = z;
 
-    dvector dv(v, z);
+    //v.a = v.b;
 
-    zed = v.a;
-    dv.v2.b = zed;
+    write("v.a.x = ");
+    write(v.a.x);
 
-    write("zed.x = ");
-    write(zed.x);
-    write(" ");
+    write("v.a.y = ");
+    write(v.a.y);
 
-    write("zed.y = ");
-    write(zed.y);
-    write(" ");
+    write("v.b.x = ");
+    write(v.b.x);
 
+    write("v.b.y = ");
+    write(v.b.y);
+    write("     ");
 
-    //v.a = z;
-    //write(v.a.x);
-    //write(" ");
-    //write(" v.a.x = ");
-    //write(v.a.x);
-    //write(" v.a.y = ");
-    //write(v.a.y);
-
-    //write(" v.b.x = ");
-    //write(v.b.x);
-    //write(" v.b.y = ");
-    //write(v.b.y);
-
-    int dist = getSqDistance(v);
-    write("dist = ");
-    write(dist);
-
-    //string s = sk;
-    //string t = teon;
-    //write(" " + s + t + " ");
-
-    int k = 2;
-    int n = 10;
-    write("Enter n: ");
-    read(n);
-    write("Enter k: ");
-    read(k);
-
-    write(power(k, n));
-
-    string s = "  hello, ";
-    string t = "for all the world!  ";
-    if (s != t){
-          write(s + t);
-    }
     return 0;
 }
 

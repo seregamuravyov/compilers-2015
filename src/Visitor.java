@@ -21,8 +21,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
     private Map<String, FunctionStorage> funcStorage = new HashMap<>();
 
-    private Map<String, Pair<String, Map<String, String>>> functions = new HashMap<>();
+    //private Map<String, Pair<String, Map<String, String>>> functions = new HashMap<>();
 
+    private List<String> globAssign = new ArrayList<>();
     private List<String> bssSection = new LinkedList<>();
     private List<String> dataSection = new LinkedList<>();
 
@@ -71,14 +72,23 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             code.add("\n\n");
         }
 
+
         for (GrammarParser.GlobalVariableDeclarationContext gvdc: ctx.globalVariableDeclaration()){
             //пофиксить
             //code.addAll(visitGlobalVariableDeclaration(gvdc).getValue());
-            visitGlobalVariableDeclaration(gvdc);
+            globAssign.addAll(visitGlobalVariableDeclaration(gvdc).getValue());
         }
 
         code.add("section .text");
         code.add("global main\n");
+
+        code.add("glob_assign:");
+        code.add("push ebp\nmov ebp, esp");
+
+        code.addAll(globAssign);
+        code.add("mov esp, ebp\npop ebp");
+        code.add("ret\n\n");
+
 
         for (GrammarParser.FunctionDefinitionContext fdc : ctx.functionDefinition()) {
             code.addAll(visitFunctionDefinition(fdc).getValue());
@@ -179,8 +189,13 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             code.add("push ebp\nmov ebp, esp");
             Pair<String, List<String>> body = visitFunctionBody(ctx.functionBody());
             code.add("sub esp, " + String.valueOf(vst.getLocalVarStackSize() + 4));
+
+            code.add("pusha");
+            code.add("call glob_assign");
+            code.add("popa");
+
             code.addAll(body.getValue());
-            //code.addAll(vst.garbageCollector());
+            code.addAll(vst.garbageCollector());
             vst.exitBlock();
             code.add("mov esp, ebp\npop ebp");
             code.add("ret");
@@ -338,9 +353,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             return visitFunctionCall(ctx.functionCall());
         else if(ctx.whileStatement() != null)
             return visitWhileStatement(ctx.whileStatement());
-//        else if(ctx.unionStatement() != null) {
-//            return visitUnionStatement(ctx.unionStatement());
-//        }
         throw new UnsupportedOperationException("Unknown statement");
     }
 
@@ -572,17 +584,24 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    //type = structureBodyStorage.get(type).get(field);
                 }
                 field = ctx.IDENTIFIER(i).getText();
                 adress += " + " + type + "."  + field;
+            }
+
+            try {
+                if (!vst.isAllocated(name) && ctx.getText().contains(".") &&
+                        !vst.getVariableAddress(name).startsWith("[ebp +")){
+                    throw new UnsupportedOperationException("Can't get field of uninitialized structure " + name);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             if (structToVarAss) {
                 code.add("push " + register);
                 code.add(adress);
                 isStructCall = true;
-                //structToVarAss = false;
             } else {
                 if (assignmentStructFl){
                     code.add(register + adress);
@@ -593,10 +612,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     code.add("push dword [" + register + adress + "]");
                 }
             }
-
-//            if (adress.length() > 0)
-//                isStructCall = true;
-
             try {
                 return new Pair<String, List<String>>(strStorage.get(type).getFieldTypeStr(field), code);
             } catch (Exception e) {
@@ -610,14 +625,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     @Override
     public Pair<String, List<String>> visitExpressionList(GrammarParser.ExpressionListContext ctx) {
         List<String> code = new ArrayList<String>();
-
-//        String funcName = ((GrammarParser.FunctionCallContext)(ctx.getParent())).IDENTIFIER().getText();
-//        for (int i = ctx.expression().size()-1; i >= 0; i--){
-//            if (visitExpression(ctx.expression(i)).getKey() == funcStorage.get(funcName).getArgType(i))
-//                code.addAll(visitExpression(ctx.expression(i)).getValue());
-//            else
-//                throw new IllegalArgumentException("Type of some arguments doen's match the defenition");
-//        }
         return new Pair<String, List<String>>(null, code);
     }
 
@@ -653,8 +660,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         } else {
-//            andExpr.getValue().add("pop eax");
-//            andExpr.getValue().add("push eax");
+
         }
         return andExpr;
     }
@@ -693,8 +699,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         else {
-//            equalityExpr.getValue().add("pop eax");
-//            equalityExpr.getValue().add("push eax");
+
         }
         return equalityExpr;
     }
@@ -765,10 +770,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         else {
-//            relationExpr.getValue().add("pop eax");
-//            relationExpr.getValue().add("push eax");
+
         }
-        //relationExpr = new Pair<>("bool", relationExpr.getValue());
         return relationExpr;
     }
 
@@ -821,10 +824,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         else {
-//            additiveExpr.getValue().add("pop eax");
-//            additiveExpr.getValue().add("push eax");
+
         }
-        //additiveExpr = new Pair<>("")
         return additiveExpr;
     }
 
@@ -885,8 +886,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
             }
         } else {
-//            multyplicationExpr.getValue().add("pop eax");
-//            multyplicationExpr.getValue().add("push eax");
+
         }
         return multyplicationExpr;
     }
@@ -930,8 +930,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         } else {
-//            atomicExpr.getValue().add("pop eax");
-//            atomicExpr.getValue().add("push eax");
+
         }
         return atomicExpr;
     }
@@ -956,17 +955,12 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     try {
                         String var = ctx.IDENTIFIER().getText();
                         String type = vst.getVariableType(var);
-                        //if (!(type.equals("int") || type.equals("bool") || type.equals("string")))
 
                         if (vst.getVariableType(var).equals("string") && vst.isGlobal(var))
                             code.add("push " + vst.getVariableAddress(var).substring(1, vst.getVariableAddress(var).length() - 1));
                         else
                             code.add("push dword " + vst.getVariableAddress(var));
 
-//                        if (vst.getVariableAddress(var).startsWith("[ebp"))
-//                            code.add("push dword " + vst.getVariableAddress(var));
-//                        else
-//                            code.add("push " + vst.getVariableAddress(var).substring(1, vst.getVariableAddress(var).length() - 1));
                         return new Pair<>(vst.getVariableType(var), code);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -1017,7 +1011,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     String var = ("tmp" + tmpVarCounter);
                     try {
                         dataSection.add(var + ": dd " + ctx.STRING_LITERAL().getText() + ", 0");
-                        //vst.addGlobalVariable(var, "string", 4);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -1030,11 +1023,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
     }
 
     @Override
-    public Pair<String, List<String>> visitIndex(GrammarParser.IndexContext ctx) {
-        return super.visitIndex(ctx);
-    }
-
-    @Override
     public Pair<String, List<String>> visitGlobalVariableDeclaration(GrammarParser.GlobalVariableDeclarationContext ctx) {
         List<String> code = new ArrayList<String>();
 
@@ -1043,15 +1031,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
             for (int i = 0; i < ctx.globalAssignment().size(); i++) {
                 Pair<String, List<String>> globalRes = visitGlobalAssignment(ctx.globalAssignment(i));
                 String name = globalRes.getKey();
-                if (!vst.containsVariable(name)){
-                    try {
-                        vst.addGlobalVariable(name, type, 4);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    throw new IllegalArgumentException("Redefenition: " + name);
-                }
                 code.addAll(globalRes.getValue());
             }
             return new Pair<>(type, code);
@@ -1065,6 +1044,17 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         List<String> code = new ArrayList<String>();
         String type = visitTypeSpecifier(((GrammarParser.GlobalVariableDeclarationContext)ctx.getParent()).typeSpecifier()).getKey();
         String name = ctx.IDENTIFIER().getText();
+
+        if (!vst.containsVariable(name)){
+            try {
+                vst.addGlobalVariable(name, type, 4);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new IllegalArgumentException("Redefenition: " + name);
+        }
+
         if (ctx.primitiveExpr() != null){
             if (type.equals("int")){
                 dataSection.add(name + ": dd " + ctx.primitiveExpr().INTEGER_LITERAL().getText());
@@ -1073,7 +1063,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     dataSection.add(name + ": dd " + ctx.primitiveExpr().STRING_LITERAL().getText() + ", 0");
                 } else {
                     if (type.equals("bool")) {
-                        String val = ctx.primitiveExpr().BOOL_LITERAL().getText();
                         dataSection.add(name + ": dd " + getBooleanValue(ctx.primitiveExpr().BOOL_LITERAL().getText()));
                     } else {
                         throw new IllegalArgumentException("Assignment of variable " + name + " is not allowed in current scope");
@@ -1081,19 +1070,99 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
         } else {
-            if (type.equals("int")){
-                bssSection.add(name + ": resd 1");
-            } else {
-                if (type.equals("string")) {
-                    bssSection.add(name + ": resd 1");
-                } else {
-                    if (type.equals("bool")) {
+            if (ctx.expressionList() != null) {
+                if (datatypeSize.containsKey(type) &&
+                        !(type.equals("string") || type.equals("int") || type.equals("bool"))) {
+
+                    try {
+                        if(!vst.isAllocated(name)) {
+                            code.add("pusha");
+                            code.add("push " + getDatatypeSize(vst.getVariableType(name)));
+                            code.add("call malloc");
+                            code.add("add esp, 4");
+
+                            code.add("mov " + vst.getVariableAddress(name) + ", eax");
+                            code.add("popa");
+                            vst.setAllocated(name);
+                        }
+
+                        for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
+                            Pair<String, List<String>> exprLstRes = visitExpression(ctx.expressionList().expression(i));
+                            try {
+                                type = vst.getVariableType(name);
+                                if (exprLstRes.getKey().equals(strStorage.get(type).getFieldType(i))){
+                                    code.addAll(exprLstRes.getValue());
+                                    code.add("pop eax");
+
+                                    if (exprLstRes.getKey().equals("int") || exprLstRes.getKey().equals("bool")){
+                                        code.add("mov ecx, " + vst.getVariableAddress(name));
+                                        code.add("mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + "], eax");
+                                    } else {
+
+                                        if (exprLstRes.getKey().equals("string")) {
+                                            code.add("push eax");
+                                            code.add("push 256");
+                                            code.add("call malloc");
+                                            code.add("add esp, 4");
+                                            code.add("mov edx, eax");
+                                            code.add("pop eax");
+
+                                            code.add("push eax");
+                                            code.add("push edx");
+                                            code.add("call strcpy");
+                                            code.add("add esp, 8");
+
+                                            code.add("mov ecx, " + vst.getVariableAddress(name));
+                                            code.add("mov [ecx +" +  type + "." + strStorage.get(type).getFieldName(i) + "], edx");
+
+                                            code.add("pusha");
+                                            code.add("push eax");
+                                            code.add("push edx");
+                                            code.add("call strcpy");
+                                            code.add("add esp, 8");
+                                            code.add("popa");
+
+                                        } else {
+                                            List<String> assignCode = new ArrayList<>();
+                                            code.addAll(assignStructuresByFields(exprLstRes.getKey(), "mov edx, [eax ", vst.getVariableAddress(name),
+                                                    "mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i), assignCode, false));
+                                        }
+
+                                    }
+                                }
+                                else
+                                    throw new IllegalArgumentException("Type of some arguments doen't match the defenition " + ctx.getText());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    isStructCall = false;
+
+                    if (datatypeSize.containsKey(type)){
+                        bssSection.add(name + ": resb " + type + ".size");
+                    } else{
+                        throw new IllegalArgumentException("Wrong type: " + type);
+                    }
+
+                } else{
+                    if (type.equals("int")){
                         bssSection.add(name + ": resd 1");
                     } else {
-                        if (datatypeSize.containsKey(type)){
-                            bssSection.add(name + ": resb " + type + ".size");
-                        } else{
-                            throw new IllegalArgumentException("Wrong type: " + type);
+                        if (type.equals("string")) {
+                            bssSection.add(name + ": resd 1");
+                        } else {
+                            if (type.equals("bool")) {
+                                bssSection.add(name + ": resd 1");
+                            } else {
+                                if (datatypeSize.containsKey(type)){
+                                    bssSection.add(name + ": resb " + type + ".size");
+                                } else{
+                                    throw new IllegalArgumentException("Wrong type: " + type);
+                                }
+                            }
                         }
                     }
                 }
@@ -1102,10 +1171,10 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
         return new Pair<>(name, code);
     }
 
-    public List<String> assignStructuresByFields(String type, String sourse, String destAdress, String dest, List<String> code){
+    public List<String> assignStructuresByFields(String type, String sourse, String destAdress, String dest, List<String> code, Boolean assignFlag){
         StructStorage structStr = strStorage.get(type);
         for (Pair<String, String> j : structStr.getFieldsLst()) {
-            if (j.getValue().equals("int") || j.getValue().equals("string") || j.getValue().equals("bool")){
+            if (j.getValue().equals("int") || j.getValue().equals("bool")){
                 code.add("mov ecx, " + destAdress);
                 code.add(sourse + " + " + type  + "." + j.getKey() + "]");
                 try {
@@ -1114,9 +1183,41 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     e.printStackTrace();
                 }
             } else {
-                List<String> assignCode = new ArrayList<>();
-                code.addAll(assignStructuresByFields(j.getValue(), sourse + " + " + type  + "." + j.getKey(),
-                        destAdress, dest + " + " + type  + "." + j.getKey(), assignCode));
+                if (j.getValue().equals("string")){
+
+                    if (!assignFlag) {
+                        code.add("push eax");
+                        code.add("push 256");
+                        code.add("call malloc");
+                        code.add("add esp, 4");
+                        code.add("mov ebx, eax");
+                        code.add("pop eax");
+
+
+                        code.add("mov ecx, " + destAdress);
+                        code.add(sourse + " + " + type + "." + j.getKey() + "]");
+                        try {
+                            code.add(dest + " + " + type + "." + j.getKey() + "], ebx");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        code.add("mov ecx, " + destAdress);
+                        code.add(sourse + " + " + type + "." + j.getKey() + "]");
+                        code.add("mov ebx, " + dest.substring(3) + " + " + type + "." + j.getKey() + "]");
+                    }
+
+                    code.add("pusha");
+                    code.add("push edx");
+                    code.add("push ebx");
+                    code.add("call strcpy");
+                    code.add("add esp, 8");
+                    code.add("popa");
+                } else {
+                    List<String> assignCode = new ArrayList<>();
+                    code.addAll(assignStructuresByFields(j.getValue(), sourse + " + " + type  + "." + j.getKey(),
+                            destAdress, dest + " + " + type  + "." + j.getKey(), assignCode, assignFlag));
+                }
             }
         }
         return code;
@@ -1149,20 +1250,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 } else {
                     if (expr.getKey().equals("string")){
                         code.add(structExpr.getValue().get(0));
-
-                        //code.add("pusha");
-                        //code.add("push dword [" + addr + "]");
-                        //code.add("call free");
-                        //code.add("add esp, 4");
-                        //code.add("popa");
-
-                        code.add("pusha");
-                        code.add("push 256");
-                        code.add("call malloc");
-                        code.add("add esp, 4");
-                        code.add("mov [" + addr + "], eax");
-                        code.add("popa");
-
                         code.add("pusha");
                         code.add("push eax");
                         code.add("push dword [" + addr + "]");
@@ -1174,9 +1261,8 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         List<String> strCall = new ArrayList<>();
                         String localAdr = structExpr.getValue().get(0).substring(9, structExpr.getValue().get(0).length());
 
-                        code.addAll(assignStructuresByFields(expr.getKey(), "mov edx, [eax ", localAdr, "mov [" + addr, strCall));
+                        code.addAll(assignStructuresByFields(expr.getKey(), "mov edx, [eax ", localAdr, "mov [" + addr, strCall, true));
                     }
-                    //code.add(structExpr.getValue().get(0));
                 }
                 isStructCall = false;
 
@@ -1199,16 +1285,7 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     throw new IllegalArgumentException("Redefenition of variable:" + name);
                 } else {
                     try {
-                        //////
-//                        if (type.equals("int") || type.equals("bool") || type.equals("string"))
-//                            vst.addLocalVariable(name, type, datatypeSize.get(type));
-//                        else {
-//                            vst.addGlobalVariable(name, type, datatypeSize.get(type));
-//                        }
-                        ////// заменить на
                         vst.addLocalVariable(name, type, 4);
-
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -1226,13 +1303,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 }
             }
 
-            //убрать нах
-//            if (!(type.equals("int") || type.equals("bool") || type.equals("string"))) {
-//                //name = vst.getStructName(name);
-//                bssSection.add(vst.getStructName(name) + ": resb " + type + ".size");
-//            }
-            //////
-
             Pair<String, List<String>> exprRes = null;
             if (ctx.expression() != null)
                 exprRes = visitExpression(ctx.expression());
@@ -1241,38 +1311,29 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
 
                 if (datatypeSize.containsKey(type) && !(type.equals("int") || type.equals("bool"))){
 
-
                     if (type.equals("string"))
                         strAssign = true;
                     else
                     {
-                        code.add("pusha");
-                        code.add("push " + getDatatypeSize(type));
-                        code.add("call malloc");
-                        code.add("add esp, 4");
                         try {
-                            code.add("mov " + vst.getVariableAddress(name) + ", eax");
+                            if (!vst.isAllocated(name)) {
+                                code.add("pusha");
+                                code.add("push " + getDatatypeSize(type));
+                                code.add("call malloc");
+                                code.add("add esp, 4");
+                                try {
+                                    code.add("mov " + vst.getVariableAddress(name) + ", eax");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                code.add("popa");
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        code.add("popa");
+                        vst.setAllocated(name);
                     }
-
-                    //code.add("popa");
-                    //if (type.equals("string"))
-
-//                    else {
-//                        try {
-//                            code.add("mov ecx, " + vst.getVariableAddress(name));
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                        code.add("mov [ecx], eax");
-//                    }
                 }
-
-//                code.addAll(exprRes.getValue());
-//                code.add("pop eax");
 
                 if (type.equals("int") ||  type.equals("bool")) {
                     code.addAll(exprRes.getValue());
@@ -1289,25 +1350,27 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                     code.add("pop eax");
 
                     if (type.equals("string")) {
-
-                        if(strAssign) {
-                            code.add("pusha");
-                            code.add("push 256");
-                            code.add("call malloc");
-                            code.add("add esp, 4");
-                            try {
-                                code.add("mov " + vst.getVariableAddress(name) + ", eax");
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        try {
+                            if(strAssign && !vst.isAllocated(name)) {
+                                code.add("pusha");
+                                code.add("push 256");
+                                code.add("call malloc");
+                                code.add("add esp, 4");
+                                try {
+                                    code.add("mov " + vst.getVariableAddress(name) + ", eax");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                code.add("popa");
+                                strAssign = false;
                             }
-                            code.add("popa");
-                            strAssign = false;
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                         code.add("pusha");
                         code.add("push eax");
                         try {
-
                             if (vst.getVariableType(name).equals("string") && vst.isGlobal(name))
                                 code.add("push " + vst.getVariableAddress(name).substring(1, vst.getVariableAddress(name).length() - 1));
                             else
@@ -1318,10 +1381,11 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         code.add("call strcpy");
                         code.add("add esp, 8");
                         code.add("popa");
+                        vst.setAllocated(name);
+
                     } else {
                         try {
                             if (ctx.getText().contains(".")){
-
                                 structToVarAss = true;
                                 exprRes = visitExpression(ctx.expression());
                                 structToVarAss = false;
@@ -1334,8 +1398,9 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                                 List<String> casualAssignment = new ArrayList<>();
 
                                 code.addAll(assignStructuresByFields(type, "mov edx, [eax " + localAddr, vst.getVariableAddress(name),
-                                        "mov [ecx " , casualAssignment));
+                                        "mov [ecx ", casualAssignment, vst.isAllocated(name)));
                                 isStructCall = false;
+                                vst.setAllocated(name);
                             } else {
                                 code.addAll(exprRes.getValue());
                                 code.add("pop eax");
@@ -1352,16 +1417,12 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        //code.add("mov [ecx], eax");
-                        //isStructCall = false;
-
                     }
                 }
             } else {
                 if (ctx.getChild(firstBrace).getText().equals("(") && ctx.getChild(firstBrace + 2).getText().equals(")")){
 
                     try {
-                        //раскомментить
                         if(!vst.isAllocated(name)) {
                             code.add("pusha");
                             code.add("push " + getDatatypeSize(vst.getVariableType(name)));
@@ -1381,72 +1442,44 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                                     code.addAll(exprLstRes.getValue());
                                     code.add("pop eax");
 
-                                    if (exprLstRes.getKey().equals("int") || exprLstRes.getKey().equals("string") || exprLstRes.getKey().equals("bool")){
+                                    if (exprLstRes.getKey().equals("int") || exprLstRes.getKey().equals("bool")){
                                         code.add("mov ecx, " + vst.getVariableAddress(name));
                                         code.add("mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + "], eax");
                                     } else {
-                                        //code.add("mov ecx, " + vst.getVariableAddress(name));
-                                        //code.add("mov edx, [eax]");
-                                        //code.add("mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + "], edx");
 
-                                        //реализовать
-                                        //if (exprLstRes.getKey() != int | string | boolean)
+                                        if (exprLstRes.getKey().equals("string")) {
+                                            code.add("push eax");
+                                            code.add("push 256");
+                                            code.add("call malloc");
+                                            code.add("add esp, 4");
+                                            code.add("mov edx, eax");
+                                            code.add("pop eax");
 
+                                            code.add("push eax");
+                                            code.add("push edx");
+                                            code.add("call strcpy");
+                                            code.add("add esp, 8");
 
-                                        List<String> assignCode = new ArrayList<>();
+                                            code.add("mov ecx, " + vst.getVariableAddress(name));
+                                            code.add("mov [ecx +" +  type + "." + strStorage.get(type).getFieldName(i) + "], edx");
 
-                                        code.addAll(assignStructuresByFields(exprLstRes.getKey(), "mov edx, [eax ", vst.getVariableAddress(name),
-                                                "mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i), assignCode));
+                                            code.add("pusha");
+                                            code.add("push eax");
+                                            code.add("push edx");
+                                            code.add("call strcpy");
+                                            code.add("add esp, 8");
+                                            code.add("popa");
 
-//                                        StructStorage structStr = strStorage.get(exprLstRes.getKey());
-//                                        for (Pair<String, String> j : structStr.getFieldsLst()) {
-//                                            if (j.getValue().equals("int") || j.getValue().equals("string") || j.getValue().equals("bool")){
-//                                                //String addr = vst.getVariableAddress(name).substring(0, vst.getVariableAddress(name).length() - 1);
-//                                                //addr += structStr.getStructType() + "";
-//                                                //code.add("mov ecx, ");
-//                                                code.add("mov ecx, " + vst.getVariableAddress(name));
-//                                                code.add("mov edx, [eax + " + exprLstRes.getKey()  + "." + j.getKey() + "]");
-//                                                try {
-//                                                code.add("mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + " + "+
-//                                                        exprLstRes.getKey()  + "." + j.getKey() + "], edx");
-//                                                } catch (Exception e) {
-//                                                    e.printStackTrace();
-//                                                }
-//                                            } else {
-//
-//                                            }
-//                                        }
+                                        } else {
+                                            List<String> assignCode = new ArrayList<>();
+                                            code.addAll(assignStructuresByFields(exprLstRes.getKey(), "mov edx, [eax ", vst.getVariableAddress(name),
+                                                    "mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i), assignCode, false));
+                                        }
 
-                                        ///////////////////////////////////////
-
-                                        // {
-                                        // mov ecx, [struct.adress]
-                                        // mov [ecx + type.field]
-                                        //
-                                        // }
-
-//                                        code.add("pusha");
-//                                        code.add("push " + getDatatypeSize(type));
-//                                        code.add("push eax");
-//
-//
-//                                        code.add("push dword [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + "]");
-//                                        code.add("call memcpy");
-//                                        code.add("add esp, 12");
-//                                        code.add("popa");
                                     }
-                                    //
-                                    //code.add("mov ecx, " + vst.getVariableAddress(name));
-                                    //code.add("mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i) + "], eax");
-                                    //
-
-                                    //убрать и заменить на вышестоящее
-                                    //code.add("mov [" + vst.getStructName(name) + " + " + type + "." +
-                                    //        strStorage.get(type).getFieldName(i) + "], eax");
-                                    ///
                                 }
                                 else
-                                    throw new IllegalArgumentException("Type of some arguments doen's match the defenition");
+                                    throw new IllegalArgumentException("Type of some arguments doen't match the defenition " + ctx.getText());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -1476,13 +1509,6 @@ public class Visitor extends GrammarBaseVisitor<Pair<String, List<String>>> {
                 String name = ctx.IDENTIFIER(i).getText();
                 if (!vst.containsVariable(name)){
                     try {
-                        ///////////////
-//                        if (type.equals("int") || type.equals("bool") || type.equals("string"))
-//                            vst.addLocalVariable(name, type, 4);
-//                        else {
-//                            vst.addGlobalVariable(name, type, 4);
-//                        }
-                        ////////////// заменить
                         vst.addLocalVariable(name, type, 4);
 
                     } catch (Exception e) {
