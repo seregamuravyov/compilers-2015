@@ -36,7 +36,7 @@ public class Main {
         //treeWalker.walk(listener, tree);
 
         //List<String> code = new Visitor().visit(tree).getValue();
-        List<String> code = visitor.visit(tree).getValue();
+        List<String> code = visitor.visit(tree).getCode();
         for (String line : code) {
             out.println(line);
             System.out.println(line);
