@@ -195,6 +195,15 @@ int main(){
     write(v.b.y);
     write("     ");
 
+
+    string l = "hello, ";
+    string tl = "hello, ";
+
+    if (l == tl){
+        write(" ");
+        write(l + tl + "fuckers! ");
+    }
+
     return 0;
 }
 

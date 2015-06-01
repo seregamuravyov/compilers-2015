@@ -359,7 +359,7 @@ ret
 main:
 push ebp
 mov ebp, esp
-sub esp, 32
+sub esp, 40
 pusha
 call glob_assign
 popa
@@ -663,6 +663,89 @@ push tmp15
 push str_format
 call printf
 add esp, 8
+push tmp16
+pop eax
+pusha
+push 256
+call malloc
+add esp, 4
+mov [ebp - 32], eax
+popa
+pusha
+push eax
+push dword [ebp - 32]
+call strcpy
+add esp, 8
+popa
+push tmp17
+pop eax
+pusha
+push 256
+call malloc
+add esp, 4
+mov [ebp - 36], eax
+popa
+pusha
+push eax
+push dword [ebp - 36]
+call strcpy
+add esp, 8
+popa
+push dword [ebp - 32]
+push dword [ebp - 36]
+call strcmp
+add esp, 8
+mov ebx, eax
+cmp ebx, 0
+je L615
+mov eax, 0
+jmp L616
+L615:
+mov eax, 1
+L616:
+push eax
+pop eax
+cmp eax, 1
+jne L607
+push tmp18
+push str_format
+call printf
+add esp, 8
+push dword [ebp - 32]
+push dword [ebp - 36]
+push 256
+call malloc
+add esp, 4
+pop ebx
+pop edx
+push edx
+push eax
+call strcpy
+add esp, 8
+push ebx
+push eax
+call strcat
+add esp, 8
+push eax
+push tmp19
+push 256
+call malloc
+add esp, 4
+pop ebx
+pop edx
+push edx
+push eax
+call strcpy
+add esp, 8
+push ebx
+push eax
+call strcat
+add esp, 8
+push eax
+push str_format
+call printf
+add esp, 8
+L607:
 push 0
 pop eax
 mov ecx, [ebp - 4]
@@ -719,12 +802,22 @@ call free
 add esp, 4
 popa
 pusha
+push dword [ebp - 36]
+call free
+add esp, 4
+popa
+pusha
 push dword [ebp - 20]
 call free
 add esp, 4
 popa
 pusha
 push dword [ebp - 24]
+call free
+add esp, 4
+popa
+pusha
+push dword [ebp - 32]
 call free
 add esp, 4
 popa
@@ -746,17 +839,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L613
+ja  L665
 mov eax, 0
-jmp L614
-L613:
+jmp L666
+L665:
 mov eax, 1
-L614:
+L666:
 push eax
 pop eax
 cmp eax, 1
-jne L607
-L608:
+jne L659
+L660:
 push dword [ebp + 8]
 push 2
 pop ebx
@@ -769,16 +862,16 @@ push 1
 pop ebx
 pop edx
 cmp edx, ebx
-je  L629
+je  L681
 mov eax, 0
-jmp L630
-L629:
+jmp L682
+L681:
 mov eax, 1
-L630:
+L682:
 push eax
 pop eax
 cmp eax, 1
-jne L621
+jne L673
 push dword [ebp - 4]
 push dword [ebp + 12]
 pop ebx
@@ -787,7 +880,7 @@ imul ebx
 push eax
 pop eax
 mov [ebp - 4], eax
-L621:
+L673:
 push dword [ebp + 12]
 push dword [ebp + 12]
 pop ebx
@@ -810,17 +903,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L669
+ja  L721
 mov eax, 0
-jmp L670
-L669:
+jmp L722
+L721:
 mov eax, 1
-L670:
+L722:
 push eax
 pop eax
 cmp eax, 1
-je L608
-L607:
+je L660
+L659:
 push dword [ebp - 4]
 pop eax
 mov esp, ebp
@@ -850,6 +943,10 @@ tmp12: dd "v.a.y = ", 0
 tmp13: dd "v.b.x = ", 0
 tmp14: dd "v.b.y = ", 0
 tmp15: dd "     ", 0
+tmp16: dd "hello, ", 0
+tmp17: dd "hello, ", 0
+tmp18: dd " ", 0
+tmp19: dd "fuckers! ", 0
 
 section .bss
 motherfucker: resb firstClass.size

@@ -2,29 +2,40 @@ package optimize;
 
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by sergey on 31.05.15.
  */
 public class IntNode implements Node {
+
+    public IntNode(Integer value) {
+        this.value = value;
+    }
+
+    private Integer value;
+
     @Override
     public Object getValue() {
-        return null;
+        return value;
     }
 
     @Override
     public boolean isValue() {
-        return false;
+        return true;
     }
 
     @Override
     public Node simplify() {
-        return null;
+        return this;
     }
 
     @Override
-    public CodeNode generateCode(int labelCounter) {
-        return null;
+    public CodeNode generateCode(Additional add) {
+        List<String> code = new ArrayList<>();
+
+        code.add("push " + value);
+        return new CodeNode("int", code, add);
     }
 }

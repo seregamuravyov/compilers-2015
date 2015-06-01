@@ -32,18 +32,19 @@ public class OrExprNode extends ExprNode {
     }
 
     @Override
-    public CodeNode generateCode(int labelCounter) {
+    public CodeNode generateCode(Additional add) {
 
         List<String> code = new ArrayList<>();
 
-        CodeNode leftGenerate = left.generateCode(labelCounter);
-        labelCounter = leftGenerate.getLabelCounter();
+        CodeNode leftGenerate = left.generateCode(add);
+        add = leftGenerate.getAdd();
 
-        CodeNode rightGenerate = right.generateCode(labelCounter);
-        labelCounter = rightGenerate.getLabelCounter();
+        CodeNode rightGenerate = right.generateCode(add);
+        add = rightGenerate.getAdd();
 
         if (leftGenerate.getType().equals("bool") && rightGenerate.getType().equals("bool")) {
-            labelCounter += 4;
+            add.setLabelVarCounter(add.getLabelVarCounter() + 4);
+            int labelCounter = add.getLabelVarCounter();
             code.add("pop ebx");
             code.add("pop edx");
             code.add("cmp edx, 1");
@@ -56,9 +57,9 @@ public class OrExprNode extends ExprNode {
             code.add("L" + (labelCounter - 1) + ":");
             code.add("mov eax, 0");
             code.add("L" + (labelCounter + 1) + ":");
-            labelCounter += 4;
+            add.setLabelVarCounter(add.getLabelVarCounter() + 4);
             code.add("push eax");
-            return new CodeNode("bool", code, labelCounter);
+            return new CodeNode("bool", code, add);
 
         } else {
             throw new IllegalArgumentException("Both values must be boolean");

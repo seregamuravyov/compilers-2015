@@ -2,6 +2,7 @@ package optimize;
 
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +31,10 @@ public class BoolNode implements Node {
     }
 
     @Override
-    public CodeNode generateCode(int labelCounter) {
-        return null;
+    public CodeNode generateCode(Additional add) {
+        List<String> code = new ArrayList<>();
+
+        code.add("push " + value);
+        return new CodeNode("bool", code, add);
     }
 }

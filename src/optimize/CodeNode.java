@@ -8,13 +8,21 @@ import java.util.List;
 public class CodeNode {
     private String type;
     private int labelCounter;
+
+    private Additional add;
+
     private List<String> code;
 
-    public CodeNode(String type, List<String> code, int labelCounter){
+    //public CodeNode(String type, List<String> code, int labelCounter){
+    public CodeNode(String type, List<String> code, Additional add){
         this.type = type;
         this.code = code;
-        this.labelCounter = labelCounter;
+        //this.labelCounter = labelCounter;
+
+        this.add = add;
     }
+
+    //setters
 
     public void setCode(List<String> code) {
         this.code = code;
@@ -28,6 +36,12 @@ public class CodeNode {
         this.labelCounter = labelCounter;
     }
 
+    public void setAdd(Additional add) {
+        this.add = add;
+    }
+
+    //getters
+
     public String getType() {
         return type;
     }
@@ -38,5 +52,9 @@ public class CodeNode {
 
     public List<String> getCode() {
         return code;
+    }
+
+    public Additional getAdd() {
+        return add;
     }
 }

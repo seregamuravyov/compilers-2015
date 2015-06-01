@@ -13,5 +13,7 @@ public interface Node {
 
     Node simplify();
 
-    CodeNode generateCode(int labelCounter);
+    CodeNode generateCode(Additional add);
+
+    //CodeNode generateCode(Additional add);
 }

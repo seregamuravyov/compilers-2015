@@ -24,7 +24,7 @@ public class IdNode implements Node  {
     }
 
     @Override
-    public CodeNode generateCode(int labelCounter) {
+    public CodeNode generateCode(Additional add) {
         return null;
     }
 }

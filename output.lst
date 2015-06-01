@@ -359,7 +359,7 @@
    359                                  main:
    360 0000027E 55                      push ebp
    361 0000027F 89E5                    mov ebp, esp
-   362 00000281 83EC20                  sub esp, 32
+   362 00000281 83EC28                  sub esp, 40
    363 00000284 60                      pusha
    364 00000285 E876FDFFFF              call glob_assign
    365 0000028A 61                      popa
@@ -663,204 +663,304 @@
    663 00000619 68[0C000000]            push str_format
    664 0000061E E8(00000000)            call printf
    665 00000623 83C408                  add esp, 8
-   666 00000626 6A00                    push 0
-   667 00000628 58                      pop eax
-   668 00000629 8B4DFC                  mov ecx, [ebp - 4]
-   669 0000062C 8B5104                  mov edx, [ecx  + map.value]
-   670 0000062F 60                      pusha
-   671 00000630 52                      push edx
-   672 00000631 E8(00000000)            call free
-   673 00000636 83C404                  add esp, 4
-   674 00000639 61                      popa
-   675 0000063A 60                      pusha
-   676 0000063B FF75FC                  push dword [ebp - 4]
-   677 0000063E E8(00000000)            call free
-   678 00000643 83C404                  add esp, 4
-   679 00000646 61                      popa
-   680 00000647 8B4DF8                  mov ecx, [ebp - 8]
-   681 0000064A 8B5104                  mov edx, [ecx  + map.value]
-   682 0000064D 60                      pusha
-   683 0000064E 52                      push edx
-   684 0000064F E8(00000000)            call free
-   685 00000654 83C404                  add esp, 4
-   686 00000657 61                      popa
-   687 00000658 60                      pusha
-   688 00000659 FF75F8                  push dword [ebp - 8]
-   689 0000065C E8(00000000)            call free
-   690 00000661 83C404                  add esp, 4
-   691 00000664 61                      popa
-   692 00000665 60                      pusha
-   693 00000666 FF75E4                  push dword [ebp - 28]
-   694 00000669 E8(00000000)            call free
-   695 0000066E 83C404                  add esp, 4
-   696 00000671 61                      popa
-   697 00000672 8B4DF4                  mov ecx, [ebp - 12]
-   698 00000675 8B5104                  mov edx, [ecx  + vecmap.x1 + map.value]
-   699 00000678 60                      pusha
-   700 00000679 52                      push edx
-   701 0000067A E8(00000000)            call free
-   702 0000067F 83C404                  add esp, 4
-   703 00000682 61                      popa
-   704 00000683 8B4DF4                  mov ecx, [ebp - 12]
-   705 00000686 8B510C                  mov edx, [ecx  + vecmap.x2 + map.value]
-   706 00000689 60                      pusha
-   707 0000068A 52                      push edx
-   708 0000068B E8(00000000)            call free
-   709 00000690 83C404                  add esp, 4
-   710 00000693 61                      popa
-   711 00000694 60                      pusha
-   712 00000695 FF75F4                  push dword [ebp - 12]
-   713 00000698 E8(00000000)            call free
-   714 0000069D 83C404                  add esp, 4
-   715 000006A0 61                      popa
-   716 000006A1 60                      pusha
-   717 000006A2 FF75F0                  push dword [ebp - 16]
-   718 000006A5 E8(00000000)            call free
-   719 000006AA 83C404                  add esp, 4
-   720 000006AD 61                      popa
-   721 000006AE 60                      pusha
-   722 000006AF FF75EC                  push dword [ebp - 20]
-   723 000006B2 E8(00000000)            call free
-   724 000006B7 83C404                  add esp, 4
-   725 000006BA 61                      popa
-   726 000006BB 60                      pusha
-   727 000006BC FF75E8                  push dword [ebp - 24]
-   728 000006BF E8(00000000)            call free
-   729 000006C4 83C404                  add esp, 4
-   730 000006C7 61                      popa
-   731 000006C8 89EC                    mov esp, ebp
-   732 000006CA 5D                      pop ebp
-   733 000006CB C3                      ret
-   734                                  
-   735                                  
-   736                                  
-   737                                  power:
-   738 000006CC 55                      push ebp
-   739 000006CD 89E5                    mov ebp, esp
-   740 000006CF 83EC08                  sub esp, 8
-   741 000006D2 6A01                    push 1
-   742 000006D4 58                      pop eax
-   743 000006D5 8945FC                  mov [ebp - 4], eax
-   744 000006D8 FF7508                  push dword [ebp + 8]
-   745 000006DB 6A00                    push 0
-   746 000006DD 5B                      pop ebx
-   747 000006DE 5A                      pop edx
-   748 000006DF 39DA                    cmp edx, ebx
-   749 000006E1 7707                    ja  L613
-   750 000006E3 B800000000              mov eax, 0
-   751 000006E8 EB05                    jmp L614
-   752                                  L613:
-   753 000006EA B801000000              mov eax, 1
-   754                                  L614:
-   755 000006EF 50                      push eax
-   756 000006F0 58                      pop eax
-   757 000006F1 83F801                  cmp eax, 1
-   758 000006F4 757B                    jne L607
-   759                                  L608:
-   760 000006F6 FF7508                  push dword [ebp + 8]
-   761 000006F9 6A02                    push 2
-   762 000006FB 5B                      pop ebx
-   763 000006FC 58                      pop eax
-   764 000006FD BA00000000              mov edx, 0
-   765 00000702 F7FB                    idiv ebx
-   766 00000704 89D0                    mov eax, edx
-   767 00000706 50                      push eax
-   768 00000707 6A01                    push 1
-   769 00000709 5B                      pop ebx
-   770 0000070A 5A                      pop edx
-   771 0000070B 39DA                    cmp edx, ebx
-   772 0000070D 7407                    je  L629
-   773 0000070F B800000000              mov eax, 0
-   774 00000714 EB05                    jmp L630
-   775                                  L629:
-   776 00000716 B801000000              mov eax, 1
-   777                                  L630:
-   778 0000071B 50                      push eax
-   779 0000071C 58                      pop eax
-   780 0000071D 83F801                  cmp eax, 1
-   781 00000720 750F                    jne L621
-   782 00000722 FF75FC                  push dword [ebp - 4]
-   783 00000725 FF750C                  push dword [ebp + 12]
-   784 00000728 5B                      pop ebx
-   785 00000729 58                      pop eax
-   786 0000072A F7EB                    imul ebx
-   787 0000072C 50                      push eax
-   788 0000072D 58                      pop eax
-   789 0000072E 8945FC                  mov [ebp - 4], eax
-   790                                  L621:
-   791 00000731 FF750C                  push dword [ebp + 12]
-   792 00000734 FF750C                  push dword [ebp + 12]
-   793 00000737 5B                      pop ebx
-   794 00000738 58                      pop eax
-   795 00000739 F7EB                    imul ebx
-   796 0000073B 50                      push eax
-   797 0000073C 58                      pop eax
-   798 0000073D 89450C                  mov [ebp + 12], eax
-   799 00000740 FF7508                  push dword [ebp + 8]
-   800 00000743 6A02                    push 2
-   801 00000745 5B                      pop ebx
-   802 00000746 58                      pop eax
-   803 00000747 BA00000000              mov edx, 0
-   804 0000074C F7FB                    idiv ebx
-   805 0000074E 50                      push eax
-   806 0000074F 58                      pop eax
-   807 00000750 894508                  mov [ebp + 8], eax
-   808 00000753 FF7508                  push dword [ebp + 8]
-   809 00000756 6A00                    push 0
-   810 00000758 5B                      pop ebx
-   811 00000759 5A                      pop edx
-   812 0000075A 39DA                    cmp edx, ebx
-   813 0000075C 7707                    ja  L669
-   814 0000075E B800000000              mov eax, 0
-   815 00000763 EB05                    jmp L670
-   816                                  L669:
-   817 00000765 B801000000              mov eax, 1
-   818                                  L670:
-   819 0000076A 50                      push eax
-   820 0000076B 58                      pop eax
-   821 0000076C 83F801                  cmp eax, 1
-   822 0000076F 7485                    je L608
-   823                                  L607:
-   824 00000771 FF75FC                  push dword [ebp - 4]
-   825 00000774 58                      pop eax
-   826 00000775 89EC                    mov esp, ebp
-   827 00000777 5D                      pop ebp
-   828 00000778 C20800                  ret 8
+   666 00000626 68[CC000000]            push tmp16
+   667 0000062B 58                      pop eax
+   668 0000062C 60                      pusha
+   669 0000062D 6800010000              push 256
+   670 00000632 E8(00000000)            call malloc
+   671 00000637 83C404                  add esp, 4
+   672 0000063A 8945E0                  mov [ebp - 32], eax
+   673 0000063D 61                      popa
+   674 0000063E 60                      pusha
+   675 0000063F 50                      push eax
+   676 00000640 FF75E0                  push dword [ebp - 32]
+   677 00000643 E8(00000000)            call strcpy
+   678 00000648 83C408                  add esp, 8
+   679 0000064B 61                      popa
+   680 0000064C 68[D8000000]            push tmp17
+   681 00000651 58                      pop eax
+   682 00000652 60                      pusha
+   683 00000653 6800010000              push 256
+   684 00000658 E8(00000000)            call malloc
+   685 0000065D 83C404                  add esp, 4
+   686 00000660 8945DC                  mov [ebp - 36], eax
+   687 00000663 61                      popa
+   688 00000664 60                      pusha
+   689 00000665 50                      push eax
+   690 00000666 FF75DC                  push dword [ebp - 36]
+   691 00000669 E8(00000000)            call strcpy
+   692 0000066E 83C408                  add esp, 8
+   693 00000671 61                      popa
+   694 00000672 FF75E0                  push dword [ebp - 32]
+   695 00000675 FF75DC                  push dword [ebp - 36]
+   696 00000678 E8(00000000)            call strcmp
+   697 0000067D 83C408                  add esp, 8
+   698 00000680 89C3                    mov ebx, eax
+   699 00000682 83FB00                  cmp ebx, 0
+   700 00000685 7407                    je L615
+   701 00000687 B800000000              mov eax, 0
+   702 0000068C EB05                    jmp L616
+   703                                  L615:
+   704 0000068E B801000000              mov eax, 1
+   705                                  L616:
+   706 00000693 50                      push eax
+   707 00000694 58                      pop eax
+   708 00000695 83F801                  cmp eax, 1
+   709 00000698 7572                    jne L607
+   710 0000069A 68[E4000000]            push tmp18
+   711 0000069F 68[0C000000]            push str_format
+   712 000006A4 E8(00000000)            call printf
+   713 000006A9 83C408                  add esp, 8
+   714 000006AC FF75E0                  push dword [ebp - 32]
+   715 000006AF FF75DC                  push dword [ebp - 36]
+   716 000006B2 6800010000              push 256
+   717 000006B7 E8(00000000)            call malloc
+   718 000006BC 83C404                  add esp, 4
+   719 000006BF 5B                      pop ebx
+   720 000006C0 5A                      pop edx
+   721 000006C1 52                      push edx
+   722 000006C2 50                      push eax
+   723 000006C3 E8(00000000)            call strcpy
+   724 000006C8 83C408                  add esp, 8
+   725 000006CB 53                      push ebx
+   726 000006CC 50                      push eax
+   727 000006CD E8(00000000)            call strcat
+   728 000006D2 83C408                  add esp, 8
+   729 000006D5 50                      push eax
+   730 000006D6 68[EC000000]            push tmp19
+   731 000006DB 6800010000              push 256
+   732 000006E0 E8(00000000)            call malloc
+   733 000006E5 83C404                  add esp, 4
+   734 000006E8 5B                      pop ebx
+   735 000006E9 5A                      pop edx
+   736 000006EA 52                      push edx
+   737 000006EB 50                      push eax
+   738 000006EC E8(00000000)            call strcpy
+   739 000006F1 83C408                  add esp, 8
+   740 000006F4 53                      push ebx
+   741 000006F5 50                      push eax
+   742 000006F6 E8(00000000)            call strcat
+   743 000006FB 83C408                  add esp, 8
+   744 000006FE 50                      push eax
+   745 000006FF 68[0C000000]            push str_format
+   746 00000704 E8(00000000)            call printf
+   747 00000709 83C408                  add esp, 8
+   748                                  L607:
+   749 0000070C 6A00                    push 0
+   750 0000070E 58                      pop eax
+   751 0000070F 8B4DFC                  mov ecx, [ebp - 4]
+   752 00000712 8B5104                  mov edx, [ecx  + map.value]
+   753 00000715 60                      pusha
+   754 00000716 52                      push edx
+   755 00000717 E8(00000000)            call free
+   756 0000071C 83C404                  add esp, 4
+   757 0000071F 61                      popa
+   758 00000720 60                      pusha
+   759 00000721 FF75FC                  push dword [ebp - 4]
+   760 00000724 E8(00000000)            call free
+   761 00000729 83C404                  add esp, 4
+   762 0000072C 61                      popa
+   763 0000072D 8B4DF8                  mov ecx, [ebp - 8]
+   764 00000730 8B5104                  mov edx, [ecx  + map.value]
+   765 00000733 60                      pusha
+   766 00000734 52                      push edx
+   767 00000735 E8(00000000)            call free
+   768 0000073A 83C404                  add esp, 4
+   769 0000073D 61                      popa
+   770 0000073E 60                      pusha
+   771 0000073F FF75F8                  push dword [ebp - 8]
+   772 00000742 E8(00000000)            call free
+   773 00000747 83C404                  add esp, 4
+   774 0000074A 61                      popa
+   775 0000074B 60                      pusha
+   776 0000074C FF75E4                  push dword [ebp - 28]
+   777 0000074F E8(00000000)            call free
+   778 00000754 83C404                  add esp, 4
+   779 00000757 61                      popa
+   780 00000758 8B4DF4                  mov ecx, [ebp - 12]
+   781 0000075B 8B5104                  mov edx, [ecx  + vecmap.x1 + map.value]
+   782 0000075E 60                      pusha
+   783 0000075F 52                      push edx
+   784 00000760 E8(00000000)            call free
+   785 00000765 83C404                  add esp, 4
+   786 00000768 61                      popa
+   787 00000769 8B4DF4                  mov ecx, [ebp - 12]
+   788 0000076C 8B510C                  mov edx, [ecx  + vecmap.x2 + map.value]
+   789 0000076F 60                      pusha
+   790 00000770 52                      push edx
+   791 00000771 E8(00000000)            call free
+   792 00000776 83C404                  add esp, 4
+   793 00000779 61                      popa
+   794 0000077A 60                      pusha
+   795 0000077B FF75F4                  push dword [ebp - 12]
+   796 0000077E E8(00000000)            call free
+   797 00000783 83C404                  add esp, 4
+   798 00000786 61                      popa
+   799 00000787 60                      pusha
+   800 00000788 FF75F0                  push dword [ebp - 16]
+   801 0000078B E8(00000000)            call free
+   802 00000790 83C404                  add esp, 4
+   803 00000793 61                      popa
+   804 00000794 60                      pusha
+   805 00000795 FF75DC                  push dword [ebp - 36]
+   806 00000798 E8(00000000)            call free
+   807 0000079D 83C404                  add esp, 4
+   808 000007A0 61                      popa
+   809 000007A1 60                      pusha
+   810 000007A2 FF75EC                  push dword [ebp - 20]
+   811 000007A5 E8(00000000)            call free
+   812 000007AA 83C404                  add esp, 4
+   813 000007AD 61                      popa
+   814 000007AE 60                      pusha
+   815 000007AF FF75E8                  push dword [ebp - 24]
+   816 000007B2 E8(00000000)            call free
+   817 000007B7 83C404                  add esp, 4
+   818 000007BA 61                      popa
+   819 000007BB 60                      pusha
+   820 000007BC FF75E0                  push dword [ebp - 32]
+   821 000007BF E8(00000000)            call free
+   822 000007C4 83C404                  add esp, 4
+   823 000007C7 61                      popa
+   824 000007C8 89EC                    mov esp, ebp
+   825 000007CA 5D                      pop ebp
+   826 000007CB C3                      ret
+   827                                  
+   828                                  
    829                                  
-   830                                  
-   831                                  
-   832                                  section .data
-   833 00000000 256400000A00000000-     int_format dd "%d", 10, 0
-   834 00000009 000000             
-   835 0000000C 257300000A00000000-     str_format dd "%s", 10, 0
-   836 00000015 000000             
-   837 00000018 00000000                globIntVar: dd 0
-   838 0000001C 497420697320676C6F-     globStringVarWithInit: dd "It is global string", 0
-   839 00000025 62616C20737472696E-
-   840 0000002E 670000000000       
-   841 00000034 00000000                globBoolVar: dd 0
-   842 00000038 666972737400000000-     tmp1: dd "first", 0
-   843 00000041 000000             
-   844 00000044 2000000000000000        tmp2: dd " ", 0
-   845 0000004C 2000000000000000        tmp3: dd " ", 0
-   846 00000054 2000000000000000        tmp4: dd " ", 0
-   847 0000005C 2000000000000000        tmp5: dd " ", 0
-   848 00000064 7365636F6E64000000-     tmp6: dd "second", 0
-   849 0000006D 000000             
-   850 00000070 2000000000000000        tmp7: dd " ", 0
-   851 00000078 2000000000000000        tmp8: dd " ", 0
-   852 00000080 2000000000000000        tmp9: dd " ", 0
-   853 00000088 2000000000000000        tmp10: dd " ", 0
-   854 00000090 762E612E78203D2000-     tmp11: dd "v.a.x = ", 0
-   855 00000099 000000             
-   856 0000009C 762E612E79203D2000-     tmp12: dd "v.a.y = ", 0
-   857 000000A5 000000             
-   858 000000A8 762E622E78203D2000-     tmp13: dd "v.b.x = ", 0
-   859 000000B1 000000             
-   860 000000B4 762E622E79203D2000-     tmp14: dd "v.b.y = ", 0
-   861 000000BD 000000             
-   862 000000C0 202020202000000000-     tmp15: dd "     ", 0
-   863 000000C9 000000             
-   864                                  
-   865                                  section .bss
-   866 00000000 <res 00000008>          motherfucker: resb firstClass.size
+   830                                  power:
+   831 000007CC 55                      push ebp
+   832 000007CD 89E5                    mov ebp, esp
+   833 000007CF 83EC08                  sub esp, 8
+   834 000007D2 6A01                    push 1
+   835 000007D4 58                      pop eax
+   836 000007D5 8945FC                  mov [ebp - 4], eax
+   837 000007D8 FF7508                  push dword [ebp + 8]
+   838 000007DB 6A00                    push 0
+   839 000007DD 5B                      pop ebx
+   840 000007DE 5A                      pop edx
+   841 000007DF 39DA                    cmp edx, ebx
+   842 000007E1 7707                    ja  L665
+   843 000007E3 B800000000              mov eax, 0
+   844 000007E8 EB05                    jmp L666
+   845                                  L665:
+   846 000007EA B801000000              mov eax, 1
+   847                                  L666:
+   848 000007EF 50                      push eax
+   849 000007F0 58                      pop eax
+   850 000007F1 83F801                  cmp eax, 1
+   851 000007F4 757B                    jne L659
+   852                                  L660:
+   853 000007F6 FF7508                  push dword [ebp + 8]
+   854 000007F9 6A02                    push 2
+   855 000007FB 5B                      pop ebx
+   856 000007FC 58                      pop eax
+   857 000007FD BA00000000              mov edx, 0
+   858 00000802 F7FB                    idiv ebx
+   859 00000804 89D0                    mov eax, edx
+   860 00000806 50                      push eax
+   861 00000807 6A01                    push 1
+   862 00000809 5B                      pop ebx
+   863 0000080A 5A                      pop edx
+   864 0000080B 39DA                    cmp edx, ebx
+   865 0000080D 7407                    je  L681
+   866 0000080F B800000000              mov eax, 0
+   867 00000814 EB05                    jmp L682
+   868                                  L681:
+   869 00000816 B801000000              mov eax, 1
+   870                                  L682:
+   871 0000081B 50                      push eax
+   872 0000081C 58                      pop eax
+   873 0000081D 83F801                  cmp eax, 1
+   874 00000820 750F                    jne L673
+   875 00000822 FF75FC                  push dword [ebp - 4]
+   876 00000825 FF750C                  push dword [ebp + 12]
+   877 00000828 5B                      pop ebx
+   878 00000829 58                      pop eax
+   879 0000082A F7EB                    imul ebx
+   880 0000082C 50                      push eax
+   881 0000082D 58                      pop eax
+   882 0000082E 8945FC                  mov [ebp - 4], eax
+   883                                  L673:
+   884 00000831 FF750C                  push dword [ebp + 12]
+   885 00000834 FF750C                  push dword [ebp + 12]
+   886 00000837 5B                      pop ebx
+   887 00000838 58                      pop eax
+   888 00000839 F7EB                    imul ebx
+   889 0000083B 50                      push eax
+   890 0000083C 58                      pop eax
+   891 0000083D 89450C                  mov [ebp + 12], eax
+   892 00000840 FF7508                  push dword [ebp + 8]
+   893 00000843 6A02                    push 2
+   894 00000845 5B                      pop ebx
+   895 00000846 58                      pop eax
+   896 00000847 BA00000000              mov edx, 0
+   897 0000084C F7FB                    idiv ebx
+   898 0000084E 50                      push eax
+   899 0000084F 58                      pop eax
+   900 00000850 894508                  mov [ebp + 8], eax
+   901 00000853 FF7508                  push dword [ebp + 8]
+   902 00000856 6A00                    push 0
+   903 00000858 5B                      pop ebx
+   904 00000859 5A                      pop edx
+   905 0000085A 39DA                    cmp edx, ebx
+   906 0000085C 7707                    ja  L721
+   907 0000085E B800000000              mov eax, 0
+   908 00000863 EB05                    jmp L722
+   909                                  L721:
+   910 00000865 B801000000              mov eax, 1
+   911                                  L722:
+   912 0000086A 50                      push eax
+   913 0000086B 58                      pop eax
+   914 0000086C 83F801                  cmp eax, 1
+   915 0000086F 7485                    je L660
+   916                                  L659:
+   917 00000871 FF75FC                  push dword [ebp - 4]
+   918 00000874 58                      pop eax
+   919 00000875 89EC                    mov esp, ebp
+   920 00000877 5D                      pop ebp
+   921 00000878 C20800                  ret 8
+   922                                  
+   923                                  
+   924                                  
+   925                                  section .data
+   926 00000000 256400000A00000000-     int_format dd "%d", 10, 0
+   927 00000009 000000             
+   928 0000000C 257300000A00000000-     str_format dd "%s", 10, 0
+   929 00000015 000000             
+   930 00000018 00000000                globIntVar: dd 0
+   931 0000001C 497420697320676C6F-     globStringVarWithInit: dd "It is global string", 0
+   932 00000025 62616C20737472696E-
+   933 0000002E 670000000000       
+   934 00000034 00000000                globBoolVar: dd 0
+   935 00000038 666972737400000000-     tmp1: dd "first", 0
+   936 00000041 000000             
+   937 00000044 2000000000000000        tmp2: dd " ", 0
+   938 0000004C 2000000000000000        tmp3: dd " ", 0
+   939 00000054 2000000000000000        tmp4: dd " ", 0
+   940 0000005C 2000000000000000        tmp5: dd " ", 0
+   941 00000064 7365636F6E64000000-     tmp6: dd "second", 0
+   942 0000006D 000000             
+   943 00000070 2000000000000000        tmp7: dd " ", 0
+   944 00000078 2000000000000000        tmp8: dd " ", 0
+   945 00000080 2000000000000000        tmp9: dd " ", 0
+   946 00000088 2000000000000000        tmp10: dd " ", 0
+   947 00000090 762E612E78203D2000-     tmp11: dd "v.a.x = ", 0
+   948 00000099 000000             
+   949 0000009C 762E612E79203D2000-     tmp12: dd "v.a.y = ", 0
+   950 000000A5 000000             
+   951 000000A8 762E622E78203D2000-     tmp13: dd "v.b.x = ", 0
+   952 000000B1 000000             
+   953 000000B4 762E622E79203D2000-     tmp14: dd "v.b.y = ", 0
+   954 000000BD 000000             
+   955 000000C0 202020202000000000-     tmp15: dd "     ", 0
+   956 000000C9 000000             
+   957 000000CC 68656C6C6F2C200000-     tmp16: dd "hello, ", 0
+   958 000000D5 000000             
+   959 000000D8 68656C6C6F2C200000-     tmp17: dd "hello, ", 0
+   960 000000E1 000000             
+   961 000000E4 2000000000000000        tmp18: dd " ", 0
+   962 000000EC 6675636B6572732120-     tmp19: dd "fuckers! ", 0
+   963 000000EC 00000000000000     
+   964                                  
+   965                                  section .bss
+   966 00000000 <res 00000008>          motherfucker: resb firstClass.size

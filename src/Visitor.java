@@ -720,7 +720,7 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                         relationExpr.getCode().add("cmp ebx, 0");
                         relationExpr.getCode().add(operator + "L" + localLabelCounter);
                         relationExpr.getCode().add("mov eax, 0");
-                        relationExpr.getCode().add("jmp " + (localLabelCounter + 1));
+                        relationExpr.getCode().add("jmp L" + (localLabelCounter + 1));
 
                         relationExpr.getCode().add("L" + (localLabelCounter) + ":");
                         relationExpr.getCode().add("mov eax, 1");
