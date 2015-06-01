@@ -30,7 +30,7 @@ public class BoolNode implements Node {
     }
 
     @Override
-    public Pair<int[], Pair<String, List<String>>> generateCode(int varCounter, int helpCounter, int constCounter, List<String> constants) {
+    public CodeNode generateCode(int labelCounter) {
         return null;
     }
 }

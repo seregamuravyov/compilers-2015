@@ -2,6 +2,7 @@ package optimize;
 
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +35,37 @@ public class AndExprNode extends ExprNode {
     }
 
     @Override
-    public Pair<int[], Pair<String, List<String>>> generateCode(int varCounter, int helpCounter, int constCounter, List<String> constants) {
-        return null;
+    public CodeNode generateCode(int labelCounter) {
+        List<String> code = new ArrayList<>();
+
+        CodeNode leftGenerate = left.generateCode(labelCounter);
+        labelCounter = leftGenerate.getLabelCounter();
+
+        CodeNode rightGenerate = right.generateCode(labelCounter);
+        labelCounter = rightGenerate.getLabelCounter();
+
+        if (leftGenerate.getType().equals("bool") && rightGenerate.getType().equals("bool")) {
+            labelCounter += 4;
+            code.add("pop ebx");
+            code.add("pop edx");
+
+            code.add("cmp edx, 1");
+            code.add("jne L" + labelCounter);
+            code.add("cmp ebx, 1");
+            code.add("jne L" + labelCounter);
+            code.add("mov eax, 1");
+            code.add("jmp L" + (labelCounter + 1));
+
+            code.add("L" + (labelCounter) + ":");
+            code.add("mov eax, 0");
+
+            code.add("L" + (labelCounter + 1) + ":");
+            code.add("push eax");
+            labelCounter += 4;
+            return new CodeNode("bool", code, labelCounter);
+
+        } else {
+            throw new IllegalArgumentException("Both values must be boolean");
+        }
     }
 }

@@ -32,36 +32,37 @@ public class OrExprNode extends ExprNode {
     }
 
     @Override
-    public Pair<int[], Pair<String, List<String>>> generateCode(int varCounter, int helpCounter, int constCounter, List<String> constants) {
+    public CodeNode generateCode(int labelCounter) {
 
         List<String> code = new ArrayList<>();
 
-        Pair<int[], Pair<String, List<String>>> leftGenerate = left.generateCode(varCounter, helpCounter, constCounter, constants);
-        varCounter = leftGenerate.getKey()[1];
+        CodeNode leftGenerate = left.generateCode(labelCounter);
+        labelCounter = leftGenerate.getLabelCounter();
 
-        Pair<int[], Pair<String, List<String>>> rightGenerate = right.generateCode(varCounter, helpCounter, constCounter, constants);
-        varCounter = rightGenerate.getKey()[1];
+        CodeNode rightGenerate = right.generateCode(labelCounter);
+        labelCounter = rightGenerate.getLabelCounter();
 
-        if (leftGenerate.getValue().getKey().equals("bool") && rightGenerate.getValue().getKey().equals("bool")) {
+        if (leftGenerate.getType().equals("bool") && rightGenerate.getType().equals("bool")) {
+            labelCounter += 4;
             code.add("pop ebx");
             code.add("pop edx");
             code.add("cmp edx, 1");
-            //code.add("je L" + localLabelCounter);
+            code.add("je L" + labelCounter);
             code.add("cmp ebx, 1");
-            //code.add("jne L" + (localLabelCounter - 1));
-            //code.add("L" + (localLabelCounter) + ":");
+            code.add("jne L" + (labelCounter - 1));
+            code.add("L" + (labelCounter) + ":");
             code.add("mov eax, 1");
-            //code.add("jmp L" + (localLabelCounter + 1));
-            //code.add("L" + (localLabelCounter - 1) + ":");
+            code.add("jmp L" + (labelCounter + 1));
+            code.add("L" + (labelCounter - 1) + ":");
             code.add("mov eax, 0");
-            //code.add("L" + (localLabelCounter + 1) + ":");
-//            labelCounter += 4;
-//            andExpr.getValue().add("push eax");
-//            andExpr = new Pair<>("bool", andExpr.getValue());
+            code.add("L" + (labelCounter + 1) + ":");
+            labelCounter += 4;
+            code.add("push eax");
+            return new CodeNode("bool", code, labelCounter);
 
         } else {
             throw new IllegalArgumentException("Both values must be boolean");
         }
-        return null;
+        //return null;
     }
 }

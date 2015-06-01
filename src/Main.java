@@ -30,12 +30,7 @@ public class Main {
 
         Visitor visitor = new Visitor();
         visitor.setFunctionStorage(fv.getFuncStorage());
-        //ParseTreeWalker treeWalker = new ParseTreeWalker();
-        //заимплементить ParseTreeListener
-        //ParseTreeListener listener = new ParseTreeListener(parser);
-        //treeWalker.walk(listener, tree);
 
-        //List<String> code = new Visitor().visit(tree).getValue();
         List<String> code = visitor.visit(tree).getCode();
         for (String line : code) {
             out.println(line);

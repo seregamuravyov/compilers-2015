@@ -14,11 +14,33 @@ public class EqExprNode extends ExprNode {
 
     @Override
     public Node simplify() {
-        return null;
+
+        left = left.simplify();
+        right = right.simplify();
+
+        if (left instanceof IntNode && right instanceof IntNode) {
+            Integer a = (Integer) ((IntNode) left).getValue();
+            Integer b = (Integer) ((IntNode) right).getValue();
+            return new BoolNode(a.equals(b));
+        }
+
+        if (left instanceof StringNode && right instanceof StringNode) {
+            String a = (String)((StringNode) left).getValue();
+            String b = (String) ((StringNode) right).getValue();
+            return new BoolNode(a.equals(b));
+        }
+
+        if (left instanceof BoolNode && right instanceof BoolNode) {
+            Boolean a = (Boolean) ((BoolNode) left).getValue();
+            Boolean b = (Boolean) ((BoolNode) right).getValue();
+            return new BoolNode(a.booleanValue() == b.booleanValue());
+        }
+
+        return this;
     }
 
     @Override
-    public Pair<int[], Pair<String, List<String>>> generateCode(int varCounter, int helpCounter, int constCounter, List<String> constants) {
+    public CodeNode generateCode(int lableCounter) {
         return null;
     }
 }

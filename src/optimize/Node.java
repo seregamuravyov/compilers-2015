@@ -13,5 +13,5 @@ public interface Node {
 
     Node simplify();
 
-    Pair<int[], Pair<String, List<String>>> generateCode(int varCounter, int helpCounter, int constCounter, List<String> constants);
+    CodeNode generateCode(int labelCounter);
 }
