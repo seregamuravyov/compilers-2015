@@ -6,7 +6,7 @@ string globStringVarWithInit = "It is global string";
 string globalStr;
 bool globBoolVar = false;
 int glob;
-firstClass motherfucker(globIntVar, globBoolVar);
+firstClass motherfucker(1488 + 1488, false && true);
 
 struct map {
     int index;
@@ -21,6 +21,11 @@ struct vecmap {
 struct firstClass {
      int num;
      bool flag;
+}
+
+struct secondClass {
+    int index;
+    firstClass fc;
 }
 
 // void function
@@ -63,7 +68,7 @@ int getSqDistance(vector v) {
 
 // Union example
 firstClass getBean () {
-    firstClass t(6, false);
+    firstClass t(recurse(6), false);
     bool result = t.flag && (globIntVar == 0);
     if (result)
     {
@@ -84,6 +89,10 @@ string strread(){
 }
 
 int main(){
+
+    firstClass c = getBean();
+
+    secondClass sc(10, getBean());
 
     // + проверка инициализации структур
     // + запись строк по значению в структуры
@@ -106,34 +115,38 @@ int main(){
     //motherfucker.num = 1488;
     //motherfucker.flag = false;
 
-    map mp(666, "first");
+    write("hello, " + "goddamn " + "motherfuckers!");
 
-    write(mp.index);
-    write(" ");
-    write(mp.value);
-    write(" ");
+    int a = (2 * 2 + 4 * 4 + 2 * 5) / 5;
 
-    map c = mp;
+    //map mp(666, "first");
 
-    write(c.index);
-    write(" ");
-    write(c.value);
-    write(" ");
+    //write(mp.index);
+    //write(" ");
+    //write(mp.value);
+    //write(" ");
 
-    mp.value = "second";
-    mp.index = 667;
+    //map c = mp;
 
-    write(mp.index);
-    write(" ");
-    write(mp.value);
-    write(" ");
+    //write(c.index);
+    //write(" ");
+    //write(c.value);
+    //write(" ");
 
-    write(c.index);
-    write(" ");
-    write(c.value);
-    write(" ");
+    //mp.value = "second";
+    //mp.index = 667;
 
-    vecmap vm(c, mp);
+    //write(mp.index);
+    //write(" ");
+    //write(mp.value);
+    //write(" ");
+
+    //write(c.index);
+    //write(" ");
+    //write(c.value);
+    //write(" ");
+
+    //vecmap vm(c, mp);
 
     //string s = "hello, dear!";
     //map m(1, "Privet");
@@ -182,28 +195,28 @@ int main(){
 
     //v.a = v.b;
 
-    write("v.a.x = ");
-    write(v.a.x);
+    //write("v.a.x = ");
+    //write(v.a.x);
 
-    write("v.a.y = ");
-    write(v.a.y);
+    //write("v.a.y = ");
+    //write(v.a.y);
 
-    write("v.b.x = ");
-    write(v.b.x);
+    //write("v.b.x = ");
+    //write(v.b.x);
 
-    write("v.b.y = ");
-    write(v.b.y);
-    write("     ");
+    //write("v.b.y = ");
+    //write(v.b.y);
+    //write("     ");
 
 
-    string l = "hello, ";
-    string tl = "hello, ";
+    //string l = "hello, ";
+    //string tl = "hello, ";
 
-    if (l == tl){
-        write(" ");
-        write(l + tl + "fuckers! ");
-    }
-
+    //if (l == tl){
+    //    write(" ");
+    //    write(l + tl + "fuckers! ");
+    //}
+    //write("im sorry     ");
     return 0;
 }
 

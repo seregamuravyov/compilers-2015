@@ -35,6 +35,14 @@ endstruc
 
 
 
+struc secondClass
+.index RESD 1
+.fc RESB firstClass.size
+.size:
+endstruc
+
+
+
 struc point
 .x RESD 1
 .y RESD 1
@@ -71,11 +79,11 @@ call malloc
 add esp, 4
 mov [motherfucker], eax
 popa
-push dword [globBoolVar]
+push 0
 pop eax
 mov ecx, [motherfucker]
 mov [ecx + firstClass.flag], eax
-push dword [globIntVar]
+push 2976
 pop eax
 mov ecx, [motherfucker]
 mov [ecx + firstClass.num], eax
@@ -141,16 +149,16 @@ push 20
 pop ebx
 pop edx
 cmp edx, ebx
-jb  L75
+jb  L79
 mov eax, 0
-jmp L76
-L75:
+jmp L80
+L79:
 mov eax, 1
-L76:
+L80:
 push eax
 pop eax
 cmp eax, 1
-jne L69
+jne L73
 push dword [ebp + 8]
 push 1
 pop ebx
@@ -162,7 +170,7 @@ call recurse
 push eax
 pop eax
 mov [ebp + 8], eax
-L69:
+L73:
 push dword [ebp + 8]
 pop eax
 mov esp, ebp
@@ -249,6 +257,8 @@ pop eax
 mov ecx, [ebp - 4]
 mov [ecx + firstClass.flag], eax
 push 6
+call recurse
+push eax
 pop eax
 mov ecx, [ebp - 4]
 mov [ecx + firstClass.num], eax
@@ -259,44 +269,44 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-je  L197
+je  L217
 mov eax, 0
-jmp L198
-L197:
+jmp L218
+L217:
 mov eax, 1
-L198:
+L218:
 push eax
 pop ebx
 pop edx
 cmp edx, 1
-jne L185
+jne L205
 cmp ebx, 1
-jne L185
+jne L205
 mov eax, 1
-jmp L186
-L185:
+jmp L206
+L205:
 mov eax, 0
-L186:
+L206:
 push eax
 pop eax
 mov [ebp - 8], eax
 push dword [ebp - 8]
 pop eax
 cmp eax, 1
-jne L209
+jne L229
 mov ecx, [ebp - 4]
 push dword [ecx + firstClass.flag]
 push int_format
 call printf
 add esp, 8
-jmp L210
-L209:
+jmp L230
+L229:
 mov ecx, [ebp - 4]
 push dword [ecx + firstClass.num]
 push int_format
 call printf
 add esp, 8
-L210:
+L230:
 push dword [ebp - 4]
 push 8
 call malloc
@@ -359,7 +369,7 @@ ret
 main:
 push ebp
 mov ebp, esp
-sub esp, 40
+sub esp, 32
 pusha
 call glob_assign
 popa
@@ -369,187 +379,41 @@ call malloc
 add esp, 4
 mov [ebp - 4], eax
 popa
-push tmp1
-pop eax
+call getBean
 push eax
-push 256
-call malloc
-add esp, 4
-mov edx, eax
 pop eax
-push eax
-push edx
-call strcpy
-add esp, 8
 mov ecx, [ebp - 4]
-mov [ecx +map.value], edx
+mov edx, [eax  + firstClass.num]
+mov [ecx  + firstClass.num], edx
+mov ecx, [ebp - 4]
+mov edx, [eax  + firstClass.flag]
+mov [ecx  + firstClass.flag], edx
 pusha
-push eax
-push edx
-call strcpy
-add esp, 8
-popa
-push 666
-pop eax
-mov ecx, [ebp - 4]
-mov [ecx + map.index], eax
-mov ecx, [ebp - 4]
-push dword [ecx + map.index]
-push int_format
-call printf
-add esp, 8
-push tmp2
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 4]
-push dword [ecx + map.value]
-push str_format
-call printf
-add esp, 8
-push tmp3
-push str_format
-call printf
-add esp, 8
-pusha
-push 8
+push 12
 call malloc
 add esp, 4
 mov [ebp - 8], eax
 popa
-push dword [ebp - 4]
-pop eax
-mov ecx, [ebp - 8]
-mov edx, [eax  + map.index]
-mov [ecx  + map.index], edx
+call getBean
 push eax
-push 256
-call malloc
-add esp, 4
-mov ebx, eax
 pop eax
 mov ecx, [ebp - 8]
-mov edx, [eax  + map.value]
-mov [ecx  + map.value], ebx
-pusha
-push edx
-push ebx
-call strcpy
-add esp, 8
-popa
+mov edx, [eax  + firstClass.num]
+mov [ecx + secondClass.fc + firstClass.num], edx
 mov ecx, [ebp - 8]
-push dword [ecx + map.index]
-push int_format
-call printf
-add esp, 8
-push tmp4
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 8]
-push dword [ecx + map.value]
-push str_format
-call printf
-add esp, 8
-push tmp5
-push str_format
-call printf
-add esp, 8
-push tmp6
+mov edx, [eax  + firstClass.flag]
+mov [ecx + secondClass.fc + firstClass.flag], edx
+push 10
 pop eax
-mov ecx, [ebp - 4]
-pusha
-push eax
-push dword [ecx + map.value]
-call strcpy
+mov ecx, [ebp - 8]
+mov [ecx + secondClass.index], eax
+push tmp311
+push str_format
+call printf
 add esp, 8
-popa
-push 667
+push 6
 pop eax
-mov ecx, [ebp - 4]
-mov [ecx + map.index], eax
-mov ecx, [ebp - 4]
-push dword [ecx + map.index]
-push int_format
-call printf
-add esp, 8
-push tmp7
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 4]
-push dword [ecx + map.value]
-push str_format
-call printf
-add esp, 8
-push tmp8
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 8]
-push dword [ecx + map.index]
-push int_format
-call printf
-add esp, 8
-push tmp9
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 8]
-push dword [ecx + map.value]
-push str_format
-call printf
-add esp, 8
-push tmp10
-push str_format
-call printf
-add esp, 8
-pusha
-push 16
-call malloc
-add esp, 4
 mov [ebp - 12], eax
-popa
-push dword [ebp - 4]
-pop eax
-mov ecx, [ebp - 12]
-mov edx, [eax  + map.index]
-mov [ecx + vecmap.x2 + map.index], edx
-push eax
-push 256
-call malloc
-add esp, 4
-mov ebx, eax
-pop eax
-mov ecx, [ebp - 12]
-mov edx, [eax  + map.value]
-mov [ecx + vecmap.x2 + map.value], ebx
-pusha
-push edx
-push ebx
-call strcpy
-add esp, 8
-popa
-push dword [ebp - 8]
-pop eax
-mov ecx, [ebp - 12]
-mov edx, [eax  + map.index]
-mov [ecx + vecmap.x1 + map.index], edx
-push eax
-push 256
-call malloc
-add esp, 4
-mov ebx, eax
-pop eax
-mov ecx, [ebp - 12]
-mov edx, [eax  + map.value]
-mov [ecx + vecmap.x1 + map.value], ebx
-pusha
-push edx
-push ebx
-call strcpy
-add esp, 8
-popa
 pusha
 push 8
 call malloc
@@ -623,135 +487,10 @@ mov [ecx + vector.b + point.x], edx
 mov ecx, [ebp - 28]
 mov edx, [eax  + point.y]
 mov [ecx + vector.b + point.y], edx
-push tmp11
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 28]
-push dword [ecx + vector.a + point.x]
-push int_format
-call printf
-add esp, 8
-push tmp12
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 28]
-push dword [ecx + vector.a + point.y]
-push int_format
-call printf
-add esp, 8
-push tmp13
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 28]
-push dword [ecx + vector.b + point.x]
-push int_format
-call printf
-add esp, 8
-push tmp14
-push str_format
-call printf
-add esp, 8
-mov ecx, [ebp - 28]
-push dword [ecx + vector.b + point.y]
-push int_format
-call printf
-add esp, 8
-push tmp15
-push str_format
-call printf
-add esp, 8
-push tmp16
-pop eax
-pusha
-push 256
-call malloc
-add esp, 4
-mov [ebp - 32], eax
-popa
-pusha
-push eax
-push dword [ebp - 32]
-call strcpy
-add esp, 8
-popa
-push tmp17
-pop eax
-pusha
-push 256
-call malloc
-add esp, 4
-mov [ebp - 36], eax
-popa
-pusha
-push eax
-push dword [ebp - 36]
-call strcpy
-add esp, 8
-popa
-push dword [ebp - 32]
-push dword [ebp - 36]
-call strcmp
-add esp, 8
-mov ebx, eax
-cmp ebx, 0
-je L615
-mov eax, 0
-jmp L616
-L615:
-mov eax, 1
-L616:
-push eax
-pop eax
-cmp eax, 1
-jne L607
-push tmp18
-push str_format
-call printf
-add esp, 8
-push dword [ebp - 32]
-push dword [ebp - 36]
-push 256
-call malloc
-add esp, 4
-pop ebx
-pop edx
-push edx
-push eax
-call strcpy
-add esp, 8
-push ebx
-push eax
-call strcat
-add esp, 8
-push eax
-push tmp19
-push 256
-call malloc
-add esp, 4
-pop ebx
-pop edx
-push edx
-push eax
-call strcpy
-add esp, 8
-push ebx
-push eax
-call strcat
-add esp, 8
-push eax
-push str_format
-call printf
-add esp, 8
-L607:
 push 0
 pop eax
-mov ecx, [ebp - 4]
-mov edx, [ecx  + map.value]
 pusha
-push edx
+push dword [ebp - 8]
 call free
 add esp, 4
 popa
@@ -760,49 +499,13 @@ push dword [ebp - 4]
 call free
 add esp, 4
 popa
-mov ecx, [ebp - 8]
-mov edx, [ecx  + map.value]
-pusha
-push edx
-call free
-add esp, 4
-popa
-pusha
-push dword [ebp - 8]
-call free
-add esp, 4
-popa
 pusha
 push dword [ebp - 28]
 call free
 add esp, 4
 popa
-mov ecx, [ebp - 12]
-mov edx, [ecx  + vecmap.x1 + map.value]
-pusha
-push edx
-call free
-add esp, 4
-popa
-mov ecx, [ebp - 12]
-mov edx, [ecx  + vecmap.x2 + map.value]
-pusha
-push edx
-call free
-add esp, 4
-popa
-pusha
-push dword [ebp - 12]
-call free
-add esp, 4
-popa
 pusha
 push dword [ebp - 16]
-call free
-add esp, 4
-popa
-pusha
-push dword [ebp - 36]
 call free
 add esp, 4
 popa
@@ -813,11 +516,6 @@ add esp, 4
 popa
 pusha
 push dword [ebp - 24]
-call free
-add esp, 4
-popa
-pusha
-push dword [ebp - 32]
 call free
 add esp, 4
 popa
@@ -839,17 +537,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L665
+ja  L425
 mov eax, 0
-jmp L666
-L665:
+jmp L426
+L425:
 mov eax, 1
-L666:
+L426:
 push eax
 pop eax
 cmp eax, 1
-jne L659
-L660:
+jne L419
+L420:
 push dword [ebp + 8]
 push 2
 pop ebx
@@ -862,16 +560,16 @@ push 1
 pop ebx
 pop edx
 cmp edx, ebx
-je  L681
+je  L441
 mov eax, 0
-jmp L682
-L681:
+jmp L442
+L441:
 mov eax, 1
-L682:
+L442:
 push eax
 pop eax
 cmp eax, 1
-jne L673
+jne L433
 push dword [ebp - 4]
 push dword [ebp + 12]
 pop ebx
@@ -880,7 +578,7 @@ imul ebx
 push eax
 pop eax
 mov [ebp - 4], eax
-L673:
+L433:
 push dword [ebp + 12]
 push dword [ebp + 12]
 pop ebx
@@ -903,17 +601,17 @@ push 0
 pop ebx
 pop edx
 cmp edx, ebx
-ja  L721
+ja  L481
 mov eax, 0
-jmp L722
-L721:
+jmp L482
+L481:
 mov eax, 1
-L722:
+L482:
 push eax
 pop eax
 cmp eax, 1
-je L660
-L659:
+je L420
+L419:
 push dword [ebp - 4]
 pop eax
 mov esp, ebp
@@ -928,25 +626,10 @@ str_format dd "%s", 10, 0
 globIntVar: dd 0
 globStringVarWithInit: dd "It is global string", 0
 globBoolVar: dd 0
-tmp1: dd "first", 0
-tmp2: dd " ", 0
-tmp3: dd " ", 0
-tmp4: dd " ", 0
-tmp5: dd " ", 0
-tmp6: dd "second", 0
-tmp7: dd " ", 0
-tmp8: dd " ", 0
-tmp9: dd " ", 0
-tmp10: dd " ", 0
-tmp11: dd "v.a.x = ", 0
-tmp12: dd "v.a.y = ", 0
-tmp13: dd "v.b.x = ", 0
-tmp14: dd "v.b.y = ", 0
-tmp15: dd "     ", 0
-tmp16: dd "hello, ", 0
-tmp17: dd "hello, ", 0
-tmp18: dd " ", 0
-tmp19: dd "fuckers! ", 0
+tmp1: dd "hello, ", 0
+tmp2: dd "goddamn ", 0
+tmp3: dd "motherfuckers!", 0
+tmp311: dd "hello, goddamn motherfuckers!", 0
 
 section .bss
 motherfucker: resb firstClass.size

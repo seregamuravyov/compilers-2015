@@ -44,7 +44,7 @@ public class StringNode implements Node {
         dataSection = add.getDataSection();
         String var = ("tmp" + tmpVarCounter);
         try {
-            dataSection.add(var + ": dd " +  value + ", 0");
+            dataSection.add(var + ": dd \"" +  value + "\", 0");
         } catch (Exception e) {
             e.printStackTrace();
         }

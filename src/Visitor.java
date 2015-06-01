@@ -1,5 +1,6 @@
 import javafx.util.Pair;
 import org.antlr.v4.runtime.misc.NotNull;
+import optimize.*;
 
 import java.util.*;
 
@@ -7,8 +8,6 @@ import java.util.*;
  * Created by sergey on 02.05.15.
  */
 public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
-
-    private boolean optimize;
 
     private int labelCounter;
     private int tmpVarCounter;
@@ -36,16 +35,19 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
     private boolean isStructCall = false;
 
-    private void setOptimize(){
-        optimize = true;
-    }
-
     private int getDatatypeSize(String s){
         return datatypeSize.get(s);
     }
 
     public void setFunctionStorage(Map<String, FunctionStorage> st){
         funcStorage = st;
+    }
+
+    private List<String> getNodeCode(CodeNode cn) {
+        tmpVarCounter = cn.getAdd().getTmpVarCounter();
+        labelCounter = cn.getAdd().getLabelVarCounter();
+        dataSection = cn.getAdd().getDataSection();
+        return  cn.getCode();
     }
 
     public VisitTreeNode visitProgramm(@NotNull GrammarParser.ProgrammContext ctx) {
@@ -74,8 +76,6 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
 
         for (GrammarParser.GlobalVariableDeclarationContext gvdc: ctx.globalVariableDeclaration()){
-            //пофиксить
-            //code.addAll(visitGlobalVariableDeclaration(gvdc).getValue());
             globAssign.addAll(visitGlobalVariableDeclaration(gvdc).getCode());
         }
 
@@ -496,7 +496,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         } else {
             if (ctx.WRITE() != null){
                 VisitTreeNode arg = visitExpression(ctx.expression());
-                code.addAll(arg.getCode());
+                if (arg.getNode() != null)
+                    code.addAll(getNodeCode(arg.getNode().simplify().generateCode(
+                            new Additional(tmpVarCounter, labelCounter, dataSection)
+                    )));
+                else
+                    code.addAll(arg.getCode());
                 format = getFormat(arg.getType());
                 code.add("push " + format);
                 code.add("call printf");
@@ -509,7 +514,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                         for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
                             VisitTreeNode exprRes = visitExpression(ctx.expressionList().expression(i));
                             if (exprRes.getType().equals(funcStorage.get(funcName).getArgType(i)))
-                                code.addAll(exprRes.getCode());
+                                if (exprRes.getNode() != null)
+                                    code.addAll(getNodeCode(exprRes.getNode().simplify().generateCode(
+                                            new Additional(tmpVarCounter, labelCounter, dataSection)
+                                    )));
+                                else
+                                    code.addAll(exprRes.getCode());
                             else
                                 throw new IllegalArgumentException("Type of some arguments doen's match the defenition");
                         }
@@ -596,7 +606,9 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
     public VisitTreeNode visitExpression(GrammarParser.ExpressionContext ctx) {
         labelCounter += 2;
         int localLabelCounter = labelCounter + 2;
+
         VisitTreeNode andExpr = visitAndExpr(ctx.andExpr(0));
+        Node node = andExpr.getNode();
         if (ctx.andExpr().size() > 1) {
             for (int i = 1; i < ctx.andExpr().size(); ++i) {
                 VisitTreeNode nextAndExpr = visitAndExpr(ctx.andExpr(i));
@@ -618,7 +630,11 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                     andExpr.getCode().add("L" + (localLabelCounter + 1) + ":");
                     labelCounter += 4;
                     andExpr.getCode().add("push eax");
-                    andExpr = new VisitTreeNode("bool", andExpr.getCode(), null);
+                    if (node != null && nextAndExpr.getNode() != null)
+                        andExpr = new VisitTreeNode("bool", andExpr.getCode(),
+                                new OrExprNode(node, nextAndExpr.getNode()));
+                    else
+                        andExpr = new VisitTreeNode("bool", andExpr.getCode(), null);
                 } else {
                     throw new IllegalArgumentException("Both values must be boolean");
                 }
@@ -634,11 +650,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         labelCounter += 2;
         int localLabelCounter = labelCounter + 2;
         VisitTreeNode equalityExpr = visitEqualityExpr(ctx.equalityExpr(0));
+        Node node = equalityExpr.getNode();
         if (ctx.equalityExpr().size() > 1)
             for (int i = 1; i < ctx.equalityExpr().size(); ++i) {
-                VisitTreeNode nextAndExpr = visitEqualityExpr(ctx.equalityExpr(i));
-                if (equalityExpr.getType().equals("bool") && nextAndExpr.getType().equals("bool")) {
-                    equalityExpr.getCode().addAll(nextAndExpr.getCode());
+                VisitTreeNode nextEqualityExpr = visitEqualityExpr(ctx.equalityExpr(i));
+                if (equalityExpr.getType().equals("bool") && nextEqualityExpr.getType().equals("bool")) {
+                    equalityExpr.getCode().addAll(nextEqualityExpr.getCode());
                     localLabelCounter++;
                     equalityExpr.getCode().add("pop ebx");
                     equalityExpr.getCode().add("pop edx");
@@ -655,7 +672,11 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
                     equalityExpr.getCode().add("L" + (localLabelCounter + 1) + ":");
                     equalityExpr.getCode().add("push eax");
-                    equalityExpr = new VisitTreeNode("bool", equalityExpr.getCode(), null);
+                    if (node != null && nextEqualityExpr.getNode() != null)
+                        equalityExpr = new VisitTreeNode("bool", equalityExpr.getCode(),
+                                new AndExprNode(node, nextEqualityExpr.getNode()));
+                    else
+                        equalityExpr = new VisitTreeNode("bool", equalityExpr.getCode(), null);
                     localLabelCounter += 4;
 
                 } else {
@@ -679,9 +700,21 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         }
     }
 
+    private Node getEqOperationNode(String operation, Node left, Node right) {
+        switch (operation) {
+            case "==":
+                return new EqExprNode(left, right);
+            case "!=":
+                return new NEqExprNode(left, right);
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public VisitTreeNode visitEqualityExpr(GrammarParser.EqualityExprContext ctx) {
         VisitTreeNode relationExpr = visitRelationExpr(ctx.relationExpr(0));
+        Node node = relationExpr.getNode();
         labelCounter += 2;
         int localLabelCounter = labelCounter + 2;
         String operator = "";
@@ -706,7 +739,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
                     relationExpr.getCode().add("L" + (localLabelCounter + 1) + ":");
                     relationExpr.getCode().add("push eax");
-                    relationExpr = new VisitTreeNode("bool", relationExpr.getCode(), null);
+                    if (node != null && nextRelationExpr.getNode() != null)
+                        relationExpr = new VisitTreeNode("bool", relationExpr.getCode(),
+                                getEqOperationNode(ctx.getChild(2 * i - 1).getText(), node, nextRelationExpr.getNode()));
+                    else
+                        relationExpr = new VisitTreeNode("bool", relationExpr.getCode(), null);
+
                     labelCounter += 4;
 
                 } else {
@@ -727,7 +765,11 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
                         relationExpr.getCode().add("L" + (localLabelCounter + 1) + ":");
                         relationExpr.getCode().add("push eax");
-                        relationExpr = new VisitTreeNode("bool", relationExpr.getCode(), null);
+                        if (node != null && relationExpr.getNode() != null)
+                            relationExpr = new VisitTreeNode("bool", relationExpr.getCode(),
+                                    getEqOperationNode(operator, node, nextRelationExpr.getNode()));
+                        else
+                            relationExpr = new VisitTreeNode("bool", relationExpr.getCode(), null);
                         labelCounter += 4;
                     } else
                         throw new IllegalArgumentException("Both values must be the same type");
@@ -754,10 +796,26 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         }
     }
 
+    private Node getRelOperationNode(String op, Node left, Node right) {
+        switch (op) {
+            case ">=":
+                return new GrEqExprNode(left, right);
+            case "<=":
+                return new LowEqExprNode(left, right);
+            case ">":
+                return new GrExprNode(left, right);
+            case "<":
+                return new LowExprNode(left, right);
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
 
     @Override
     public VisitTreeNode visitRelationExpr(GrammarParser.RelationExprContext ctx) {
         VisitTreeNode additiveExpr = visitAdditiveExpr(ctx.additiveExpr(0));
+        Node node = additiveExpr.getNode();
         labelCounter += 2;
         int localLabelCounter = labelCounter + 2;
         if (ctx.additiveExpr().size() > 1)
@@ -782,7 +840,11 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                     additiveExpr.getCode().add("L" + (localLabelCounter + 1) + ":");
                     additiveExpr.getCode().add("push eax");
                     labelCounter += 4;
-                    additiveExpr = new VisitTreeNode("bool", additiveExpr.getCode(), null);
+                    if (node != null && nextAdditiveExpr.getNode() != null)
+                        additiveExpr = new VisitTreeNode("bool", additiveExpr.getCode(),
+                                getRelOperationNode(ctx.getChild(2 * i - 1).getText(), node, nextAdditiveExpr.getNode()));
+                    else
+                        additiveExpr = new VisitTreeNode("bool", additiveExpr.getCode(), null);
                 } else {
                     throw new IllegalArgumentException("Both values must be integer or boolean");
                 }
@@ -804,12 +866,25 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         }
     }
 
+    private Node getAddOperationNode(String op, Node left, Node right) {
+        switch (op) {
+            case "+":
+                return new AddExprNode(left, right);
+            case "-":
+                return new SubExprNode(left, right);
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public VisitTreeNode visitAdditiveExpr(GrammarParser.AdditiveExprContext ctx) {
         VisitTreeNode multyplicationExpr = visitMultyplicationExpr(ctx.multyplicationExpr(0));
+        Node node = multyplicationExpr.getNode();
         String operator = "";
         if (ctx.multyplicationExpr().size() > 1) {
             for (int i = 1; i < ctx.multyplicationExpr().size(); i++) {
+                node = multyplicationExpr.getNode();
                 VisitTreeNode nextMultyplicationExpr = visitMultyplicationExpr(ctx.multyplicationExpr(i));
                 operator = getAddOperator(ctx.getChild(2 * i - 1).getText());
                 if(multyplicationExpr.getType().equals("int") && nextMultyplicationExpr.getType().equals("int")){
@@ -819,7 +894,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                     multyplicationExpr.getCode().add(operator + " edx, ebx");
                     multyplicationExpr.getCode().add("mov eax, edx");
                     multyplicationExpr.getCode().add("push eax");
-                    multyplicationExpr = new VisitTreeNode("int", multyplicationExpr.getCode(), null);
+
+                    if (node != null && nextMultyplicationExpr.getNode() != null)
+                        multyplicationExpr = new VisitTreeNode("int", multyplicationExpr.getCode(),
+                                getAddOperationNode(ctx.getChild(2 * i - 1).getText(), node, nextMultyplicationExpr.getNode()));
+                    else
+                        multyplicationExpr = new VisitTreeNode("int", multyplicationExpr.getCode(), null);
                 } else {
                   if (multyplicationExpr.getType().equals("string") && nextMultyplicationExpr.getType().equals("string") && operator.equals("add"))  {
                       multyplicationExpr.getCode().addAll(nextMultyplicationExpr.getCode());
@@ -842,7 +922,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                       multyplicationExpr.getCode().add("add esp, 8");
 
                       multyplicationExpr.getCode().add("push eax");
-                      multyplicationExpr = new VisitTreeNode("string", multyplicationExpr.getCode(), null);
+                      if (node != null && nextMultyplicationExpr.getNode() != null)
+                          multyplicationExpr = new VisitTreeNode("string", multyplicationExpr.getCode(),
+                                  new AddExprNode(node, nextMultyplicationExpr.getNode()));
+                      else
+                          multyplicationExpr = new VisitTreeNode("string", multyplicationExpr.getCode(), null);
+
                   } else {
                       throw new IllegalArgumentException("Both values must be integer or strings for concatetaion");
                   }
@@ -872,11 +957,26 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         return lst;
     }
 
+    private Node getMulOperationNode(String operation, Node left, Node right) {
+        switch (operation) {
+            case "*":
+                return new MultExprNode(left, right);
+            case "/":
+                return new DivExprNode(left, right);
+            case "%":
+                return new ModExprNode(left, right);
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public VisitTreeNode visitMultyplicationExpr(GrammarParser.MultyplicationExprContext ctx) {
         VisitTreeNode atomicExpr = visitAtomicExpr(ctx.atomicExpr(0));
+        Node node = atomicExpr.getNode();
         if (ctx.atomicExpr().size() > 1) {
             for (int i = 1; i < ctx.atomicExpr().size(); i++) {
+                node = atomicExpr.getNode();
                 VisitTreeNode nextAtomicExpr = visitAtomicExpr(ctx.atomicExpr(i));
                 if(atomicExpr.getType().equals("int") && nextAtomicExpr.getType().equals("int")){
                     atomicExpr.getCode().addAll(nextAtomicExpr.getCode());
@@ -888,7 +988,11 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                     atomicExpr.getCode().addAll(lst);
 
                     atomicExpr.getCode().add("push eax");
-                    atomicExpr = new VisitTreeNode("int", atomicExpr.getCode(), null);
+                    if (node != null && nextAtomicExpr.getNode() != null)
+                        atomicExpr = new VisitTreeNode("int", atomicExpr.getCode(),
+                                getMulOperationNode(op, node, nextAtomicExpr.getNode()));
+                    else
+                        atomicExpr = new VisitTreeNode("int", atomicExpr.getCode(), null);
                 } else {
                     throw new IllegalArgumentException("Both values must be integer");
                 }
@@ -905,7 +1009,7 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         if (ctx.primitiveExpr() != null) {
             VisitTreeNode exprRes = visitPrimitiveExpr(ctx.primitiveExpr());
             code.addAll(exprRes.getCode());
-            return new VisitTreeNode(exprRes.getType(), code, null);
+            return new VisitTreeNode(exprRes.getType(), code, exprRes.getNode());
         } else {
             if (ctx.functionCall() != null && funcStorage.containsKey(ctx.functionCall().IDENTIFIER().getText())
                     && !funcStorage.get(ctx.functionCall().IDENTIFIER().getText()).getReturnType().equals("void")){
@@ -916,8 +1020,6 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                 if (ctx.IDENTIFIER() != null &&  vst.containsVariable(ctx.IDENTIFIER().getText())) {
                     try {
                         String var = ctx.IDENTIFIER().getText();
-                        //String type = vst.getVariableType(var);
-
                         if (vst.getVariableType(var).equals("string") && vst.isGlobal(var))
                             code.add("push " + vst.getVariableAddress(var).substring(1, vst.getVariableAddress(var).length() - 1));
                         else
@@ -936,7 +1038,7 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                         if (ctx.expression() != null){
                             VisitTreeNode exprRes = visitExpression(ctx.expression());
                             code.addAll(exprRes.getCode());
-                            return new VisitTreeNode(exprRes.getType(), code, null);
+                            return new VisitTreeNode(exprRes.getType(), code, exprRes.getNode());
                         }
                     }
 
@@ -962,22 +1064,27 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
         List<String> code = new ArrayList<String>();
         if (ctx.BOOL_LITERAL() != null){
             code.add("push " + getBooleanValue(ctx.BOOL_LITERAL().getText()));
-            return new VisitTreeNode("bool", code, null);
+            return new VisitTreeNode("bool", code,
+                    new BoolNode(getBooleanValue(ctx.BOOL_LITERAL().getText()).equals(1)));
         } else {
             if (ctx.INTEGER_LITERAL() != null) {
                 code.add("push " + ctx.INTEGER_LITERAL().getText());
-                return new VisitTreeNode("int", code, null);
+                return new VisitTreeNode("int", code,
+                        new IntNode(Integer.parseInt(ctx.INTEGER_LITERAL().getText())));
             } else {
                 if (ctx.STRING_LITERAL() != null) {
                     tmpVarCounter++;
                     String var = ("tmp" + tmpVarCounter);
+                    String str = ctx.STRING_LITERAL().getText();
                     try {
-                        dataSection.add(var + ": dd " + ctx.STRING_LITERAL().getText() + ", 0");
+                        dataSection.add(var + ": dd " + str + ", 0");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     code.add("push " + var);
-                    return new VisitTreeNode("string", code, null);
+
+                    return new VisitTreeNode("string", code,
+                            new StringNode(str.substring(1, str.length()-1)));
                 }
             }
         }
@@ -1048,12 +1155,18 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                             vst.setAllocated(name);
                         }
 
-                        for (int i = ctx.expressionList().expression().size()-1; i >= 0; i--){
+                        for (int i = ctx.expressionList().expression().size() - 1; i >= 0; i--){
                             VisitTreeNode exprLstRes = visitExpression(ctx.expressionList().expression(i));
                             try {
                                 type = vst.getVariableType(name);
                                 if (exprLstRes.getType().equals(strStorage.get(type).getFieldType(i))){
-                                    code.addAll(exprLstRes.getCode());
+
+                                    if (exprLstRes.getNode() != null)
+                                        code.addAll(getNodeCode(exprLstRes.getNode().simplify().generateCode(
+                                                new Additional(tmpVarCounter, labelCounter, dataSection)
+                                        )));
+                                    else
+                                        code.addAll(exprLstRes.getCode());
                                     code.add("pop eax");
 
                                     if (exprLstRes.getType().equals("int") || exprLstRes.getType().equals("bool")){
@@ -1203,7 +1316,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
             VisitTreeNode expr = visitExpression(ctx.expression());
 
             if (structExpr.getType().equals(expr.getType())) {
-                code.addAll(expr.getCode());
+                if (expr.getNode() != null)
+                    code.addAll(getNodeCode(expr.getNode().simplify().generateCode(
+                            new Additional(tmpVarCounter, labelCounter, dataSection)
+                    )));
+                else
+                    code.addAll(expr.getCode());
                 code.add("pop eax");
 
                 if (expr.getType().equals("int") || expr.getType().equals("bool")){
@@ -1298,7 +1416,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                 }
 
                 if (type.equals("int") ||  type.equals("bool")) {
-                    code.addAll(exprRes.getCode());
+                    if (exprRes.getNode() != null)
+                        code.addAll(getNodeCode(exprRes.getNode().simplify().generateCode(
+                                new Additional(tmpVarCounter, labelCounter, dataSection)
+                        )));
+                    else
+                        code.addAll(exprRes.getCode());
                     code.add("pop eax");
                     try {
                         code.add("mov " + vst.getVariableAddress(name) + ", eax");
@@ -1309,7 +1432,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                 else {
 
                     if (type.equals("string")) {
-                        code.addAll(exprRes.getCode());
+                        if (exprRes.getNode() != null)
+                            code.addAll(getNodeCode(exprRes.getNode().simplify().generateCode(
+                                    new Additional(tmpVarCounter, labelCounter, dataSection)
+                            )));
+                        else
+                            code.addAll(exprRes.getCode());
                         code.add("pop eax");
                         try {
                             if(strAssign && !vst.isAllocated(name)) {
@@ -1346,41 +1474,27 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
 
                     } else {
                         try {
-                            //if (ctx.getText().contains(".")){
-                                structToVarAss = true;
-                                exprRes = visitExpression(ctx.expression());
-                                structToVarAss = false;
+                            structToVarAss = true;
+                            exprRes = visitExpression(ctx.expression());
+                            structToVarAss = false;
 
-                                String localAddr = "";
+                            String localAddr = "";
 
-                                if (ctx.getText().contains(".")) {
-                                    localAddr = exprRes.getCode().get(exprRes.getCode().size() - 1);
-                                    code.addAll(exprRes.getCode().subList(0, 2));
-                                } else {
-                                    code.addAll(exprRes.getCode());
-                                }
+                            if (ctx.getText().contains(".")) {
+                                localAddr = exprRes.getCode().get(exprRes.getCode().size() - 1);
+                                code.addAll(exprRes.getCode().subList(0, 2));
+                            } else {
+                                code.addAll(exprRes.getCode());
+                            }
 
-                                code.add("pop eax");
+                            code.add("pop eax");
 
-                                List<String> casualAssignment = new ArrayList<>();
+                            List<String> casualAssignment = new ArrayList<>();
 
-                                code.addAll(assignStructuresByFields(type, "mov edx, [eax " + localAddr, vst.getVariableAddress(name),
-                                        "mov [ecx ", casualAssignment, vst.isAllocated(name)));
-                                isStructCall = false;
-                                vst.setAllocated(name);
-//                            } else {
-//                                code.addAll(exprRes.getValue());
-//                                code.add("pop eax");
-//
-//                                code.add("pusha");
-//                                code.add("push " + getDatatypeSize(type));
-//                                code.add("push eax");
-//                                code.add("push dword " + vst.getVariableAddress(name));
-//                                code.add("call memcpy");
-//                                code.add("add esp, 12");
-//                                code.add("popa");
-//                            }
-                            //code.add("mov ecx, " + vst.getVariableAddress(name));
+                            code.addAll(assignStructuresByFields(type, "mov edx, [eax " + localAddr, vst.getVariableAddress(name),
+                                    "mov [ecx ", casualAssignment, vst.isAllocated(name)));
+                            isStructCall = false;
+                            vst.setAllocated(name);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1406,7 +1520,12 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                             try {
                                 type = vst.getVariableType(name);
                                 if (exprLstRes.getType().equals(strStorage.get(type).getFieldType(i))){
-                                    code.addAll(exprLstRes.getCode());
+                                    if (exprLstRes.getNode() != null)
+                                        code.addAll(getNodeCode(exprLstRes.getNode().simplify().generateCode(
+                                                new Additional(tmpVarCounter, labelCounter, dataSection)
+                                        )));
+                                    else
+                                        code.addAll(exprLstRes.getCode());
                                     code.add("pop eax");
 
                                     if (exprLstRes.getType().equals("int") || exprLstRes.getType().equals("bool")){

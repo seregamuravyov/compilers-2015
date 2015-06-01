@@ -7,18 +7,12 @@ import java.util.List;
  */
 public class CodeNode {
     private String type;
-    private int labelCounter;
-
     private Additional add;
-
     private List<String> code;
 
-    //public CodeNode(String type, List<String> code, int labelCounter){
     public CodeNode(String type, List<String> code, Additional add){
         this.type = type;
         this.code = code;
-        //this.labelCounter = labelCounter;
-
         this.add = add;
     }
 
@@ -32,10 +26,6 @@ public class CodeNode {
         this.type = type;
     }
 
-    public void setLabelCounter(int labelCounter) {
-        this.labelCounter = labelCounter;
-    }
-
     public void setAdd(Additional add) {
         this.add = add;
     }
@@ -44,10 +34,6 @@ public class CodeNode {
 
     public String getType() {
         return type;
-    }
-
-    public int getLabelCounter() {
-        return labelCounter;
     }
 
     public List<String> getCode() {
