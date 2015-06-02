@@ -119,7 +119,7 @@ public class VariableStorage {
         List<String> code = new ArrayList<>();
         for (VariableDescription i : storage.peek().values()) {
             if (!(i.getType().equals("bool")) && !(i.getType().equals("int"))
-                    && i.getAdress().startsWith("[ebp -")) {
+                    && i.getAdress().startsWith("[ebp -") && i.getIsAllocated()) {
                 if (i.getType().equals("string")) {
                     code.add("pusha");
                     code.add("push dword " + i.getAdress());

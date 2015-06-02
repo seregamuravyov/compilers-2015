@@ -1338,6 +1338,27 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                         code.add("popa");
 
                     } else {
+
+//                        structToVarAss = true;
+//                        expr = visitExpression(ctx.expression());
+//                        structToVarAss = false;
+//
+//                        String localAddr = "";
+//
+//                        if (ctx.getText().contains(".")) {
+//                            localAddr = expr.getCode().get(expr.getCode().size() - 1);
+//                            code.addAll(expr.getCode().subList(0, 2));
+//                        } else {
+//                            code.addAll(expr.getCode());
+//                        }
+//
+//                        code.add("pop eax");
+//
+//                        List<String> casualAssignment = new ArrayList<>();
+//
+//                        code.addAll(assignStructuresByFields(type, "mov edx, [eax " + localAddr, vst.getVariableAddress(name),
+//                                "mov [ecx + ", casualAssignment, true));
+
                         List<String> strCall = new ArrayList<>();
                         String localAdr = structExpr.getCode().get(0).substring(9, structExpr.getCode().get(0).length());
 
@@ -1557,9 +1578,30 @@ public class Visitor extends GrammarBaseVisitor<VisitTreeNode> {
                                             code.add("popa");
 
                                         } else {
-                                            List<String> assignCode = new ArrayList<>();
-                                            code.addAll(assignStructuresByFields(exprLstRes.getType(), "mov edx, [eax ", vst.getVariableAddress(name),
-                                                    "mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i), assignCode, false));
+                                            structToVarAss = true;
+                                            exprLstRes = visitExpression(ctx.expressionList().expression(i));
+                                            structToVarAss = false;
+
+                                            String localAddr = "";
+
+                                            if (ctx.getText().contains(".")) {
+                                                localAddr = exprLstRes.getCode().get(exprLstRes.getCode().size() - 1);
+                                                code.addAll(exprLstRes.getCode().subList(0, 2));
+                                            } else {
+                                                code.addAll(exprLstRes.getCode());
+                                            }
+
+                                            code.add("pop eax");
+
+                                            List<String> casualAssignment = new ArrayList<>();
+
+                                            code.addAll(assignStructuresByFields(type, "mov edx, [eax " + localAddr, vst.getVariableAddress(name),
+                                                    "mov [ecx + ", casualAssignment, vst.isAllocated(name)));
+
+
+                                            //List<String> assignCode = new ArrayList<>();
+                                            //code.addAll(assignStructuresByFields(exprLstRes.getType(), "mov edx, [eax ", vst.getVariableAddress(name),
+                                            //        "mov [ecx + " +  type + "." + strStorage.get(type).getFieldName(i), assignCode, false));
                                         }
 
                                     }

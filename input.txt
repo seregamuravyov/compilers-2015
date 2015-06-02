@@ -94,12 +94,16 @@ int main(){
 
     secondClass sc(10, getBean());
 
+    secondClass scc(50, sc.fc);
+
     // + проверка инициализации структур
     // + запись строк по значению в структуры
     // + очистка строк внутри структуры
     // + запрет обращений к полям, если отсутствует инициализация структуры
     // + присваивание глобально объявленных структур
-    // присваивание полей структур полям структур v.a = t.b
+    // - присваивание полей структур полям структур v.a = t.b
+    // + запись значений из полей других структур в конструкторе
+    // - проверить передачу аргументов в функцию, как поле струтуры (через дополнительную переменную)
 
     //string s = "hello";
     //string t;
@@ -186,37 +190,35 @@ int main(){
     point x(0, 0);
     point y(3, 4);
 
-    point z;
-
     vector v(y, x);
 
-    z = v.a;
-    v.b = z;
+    point z = v.a;
 
+    v.b = z;
     //v.a = v.b;
 
-    //write("v.a.x = ");
-    //write(v.a.x);
+    write("v.a.x = ");
+    write(v.a.x);
 
-    //write("v.a.y = ");
-    //write(v.a.y);
+    write("v.a.y = ");
+    write(v.a.y);
 
-    //write("v.b.x = ");
-    //write(v.b.x);
+    write("v.b.x = ");
+    write(v.b.x);
 
-    //write("v.b.y = ");
-    //write(v.b.y);
-    //write("     ");
+    write("v.b.y = ");
+    write(v.b.y);
+    write("     ");
 
 
-    //string l = "hello, ";
-    //string tl = "hello, ";
+    string l = "hello, ";
+    string tl = "hello, ";
 
-    //if (l == tl){
-    //    write(" ");
-    //    write(l + tl + "fuckers! ");
-    //}
-    //write("im sorry     ");
+    if (l == tl){
+        write(" ");
+        write(l + tl + "fuckers! ");
+    }
+    write("im sorry     ");
     return 0;
 }
 
