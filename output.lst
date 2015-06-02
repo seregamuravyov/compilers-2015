@@ -27,842 +27,294 @@
     27                                  
     28                                  
     29                                  
-    30                                  struc firstClass
-    31 00000000 <res 00000004>          .num RESD 1
-    32 00000004 <res 00000004>          .flag RESD 1
-    33                                  .size:
-    34                                  endstruc
-    35                                  
-    36                                  
-    37                                  
-    38                                  struc secondClass
-    39 00000000 <res 00000004>          .index RESD 1
-    40 00000004 <res 00000008>          .fc RESB firstClass.size
-    41                                  .size:
-    42                                  endstruc
-    43                                  
-    44                                  
-    45                                  
-    46                                  struc point
-    47 00000000 <res 00000004>          .x RESD 1
-    48 00000004 <res 00000004>          .y RESD 1
-    49                                  .size:
-    50                                  endstruc
-    51                                  
-    52                                  
-    53                                  
-    54                                  struc vector
-    55 00000000 <res 00000008>          .a RESB point.size
-    56 00000008 <res 00000008>          .b RESB point.size
-    57                                  .size:
-    58                                  endstruc
-    59                                  
-    60                                  
-    61                                  
-    62                                  struc dvector
-    63 00000000 <res 00000010>          .v1 RESB vector.size
-    64 00000010 <res 00000010>          .v2 RESB vector.size
-    65                                  .size:
-    66                                  endstruc
-    67                                  
-    68                                  
-    69                                  
-    70                                  section .text
-    71                                  global main
-    72                                  
-    73                                  glob_assign:
-    74 00000000 55                      push ebp
-    75 00000001 89E5                    mov ebp, esp
-    76 00000003 60                      pusha
-    77 00000004 6A08                    push 8
-    78 00000006 E8(00000000)            call malloc
-    79 0000000B 83C404                  add esp, 4
-    80 0000000E A3[00000000]            mov [motherfucker], eax
-    81 00000013 61                      popa
-    82 00000014 6A00                    push 0
-    83 00000016 58                      pop eax
-    84 00000017 8B0D[00000000]          mov ecx, [motherfucker]
-    85 0000001D 894104                  mov [ecx + firstClass.flag], eax
-    86 00000020 68A00B0000              push 2976
-    87 00000025 58                      pop eax
-    88 00000026 8B0D[00000000]          mov ecx, [motherfucker]
-    89 0000002C 8901                    mov [ecx + firstClass.num], eax
-    90 0000002E 89EC                    mov esp, ebp
-    91 00000030 5D                      pop ebp
-    92 00000031 C3                      ret
-    93                                  
-    94                                  
-    95                                  doNothing:
-    96 00000032 55                      push ebp
-    97 00000033 89E5                    mov ebp, esp
-    98 00000035 83EC08                  sub esp, 8
-    99 00000038 8B4D08                  mov ecx, [ebp + 8]
-   100 0000003B FF31                    push dword [ecx + firstClass.num]
-   101 0000003D 68[00000000]            push int_format
-   102 00000042 E8(00000000)            call printf
-   103 00000047 83C408                  add esp, 8
-   104 0000004A 60                      pusha
-   105 0000004B 6A08                    push 8
-   106 0000004D E8(00000000)            call malloc
-   107 00000052 83C404                  add esp, 4
-   108 00000055 8945FC                  mov [ebp - 4], eax
-   109 00000058 61                      popa
-   110 00000059 FF7508                  push dword [ebp + 8]
-   111 0000005C 58                      pop eax
-   112 0000005D 8B4DFC                  mov ecx, [ebp - 4]
-   113 00000060 8B10                    mov edx, [eax  + firstClass.num]
-   114 00000062 8911                    mov [ecx  + firstClass.num], edx
-   115 00000064 8B4DFC                  mov ecx, [ebp - 4]
-   116 00000067 8B5004                  mov edx, [eax  + firstClass.flag]
-   117 0000006A 895104                  mov [ecx  + firstClass.flag], edx
-   118 0000006D 68D0050000              push 1488
-   119 00000072 58                      pop eax
-   120 00000073 8B4DFC                  mov ecx, [ebp - 4]
-   121 00000076 8901                    mov [ecx + firstClass.num], eax
-   122 00000078 8B4D08                  mov ecx, [ebp + 8]
-   123 0000007B FF31                    push dword [ecx + firstClass.num]
-   124 0000007D 68[00000000]            push int_format
-   125 00000082 E8(00000000)            call printf
-   126 00000087 83C408                  add esp, 8
-   127 0000008A 8B4DFC                  mov ecx, [ebp - 4]
-   128 0000008D FF31                    push dword [ecx + firstClass.num]
-   129 0000008F 68[00000000]            push int_format
-   130 00000094 E8(00000000)            call printf
-   131 00000099 83C408                  add esp, 8
-   132 0000009C 60                      pusha
-   133 0000009D FF75FC                  push dword [ebp - 4]
-   134 000000A0 E8(00000000)            call free
-   135 000000A5 83C404                  add esp, 4
-   136 000000A8 61                      popa
-   137 000000A9 89EC                    mov esp, ebp
-   138 000000AB 5D                      pop ebp
-   139 000000AC C20400                  ret 4
-   140                                  
-   141                                  
-   142                                  
-   143                                  recurse:
-   144 000000AF 55                      push ebp
-   145 000000B0 89E5                    mov ebp, esp
-   146 000000B2 83EC04                  sub esp, 4
-   147 000000B5 FF7508                  push dword [ebp + 8]
-   148 000000B8 6A14                    push 20
-   149 000000BA 5B                      pop ebx
-   150 000000BB 5A                      pop edx
-   151 000000BC 39DA                    cmp edx, ebx
-   152 000000BE 7207                    jb  L79
-   153 000000C0 B800000000              mov eax, 0
-   154 000000C5 EB05                    jmp L80
-   155                                  L79:
-   156 000000C7 B801000000              mov eax, 1
-   157                                  L80:
-   158 000000CC 50                      push eax
-   159 000000CD 58                      pop eax
-   160 000000CE 83F801                  cmp eax, 1
-   161 000000D1 7516                    jne L73
-   162 000000D3 FF7508                  push dword [ebp + 8]
-   163 000000D6 6A01                    push 1
-   164 000000D8 5B                      pop ebx
-   165 000000D9 5A                      pop edx
-   166 000000DA 01DA                    add edx, ebx
-   167 000000DC 89D0                    mov eax, edx
-   168 000000DE 50                      push eax
-   169 000000DF E8CBFFFFFF              call recurse
-   170 000000E4 50                      push eax
-   171 000000E5 58                      pop eax
-   172 000000E6 894508                  mov [ebp + 8], eax
-   173                                  L73:
-   174 000000E9 FF7508                  push dword [ebp + 8]
-   175 000000EC 58                      pop eax
-   176 000000ED 89EC                    mov esp, ebp
-   177 000000EF 5D                      pop ebp
-   178 000000F0 C20400                  ret 4
-   179                                  
-   180                                  
-   181                                  
-   182                                  getSqDistance:
-   183 000000F3 55                      push ebp
-   184 000000F4 89E5                    mov ebp, esp
-   185 000000F6 83EC08                  sub esp, 8
-   186 000000F9 8B4D08                  mov ecx, [ebp + 8]
-   187 000000FC FF31                    push dword [ecx + vector.a + point.x]
-   188 000000FE 8B4D08                  mov ecx, [ebp + 8]
-   189 00000101 FF7108                  push dword [ecx + vector.b + point.x]
-   190 00000104 5B                      pop ebx
-   191 00000105 5A                      pop edx
-   192 00000106 29DA                    sub edx, ebx
-   193 00000108 89D0                    mov eax, edx
-   194 0000010A 50                      push eax
-   195 0000010B 8B4D08                  mov ecx, [ebp + 8]
-   196 0000010E FF31                    push dword [ecx + vector.a + point.x]
-   197 00000110 8B4D08                  mov ecx, [ebp + 8]
-   198 00000113 FF7108                  push dword [ecx + vector.b + point.x]
-   199 00000116 5B                      pop ebx
-   200 00000117 5A                      pop edx
-   201 00000118 29DA                    sub edx, ebx
-   202 0000011A 89D0                    mov eax, edx
-   203 0000011C 50                      push eax
-   204 0000011D 5B                      pop ebx
-   205 0000011E 58                      pop eax
-   206 0000011F F7EB                    imul ebx
-   207 00000121 50                      push eax
-   208 00000122 8B4D08                  mov ecx, [ebp + 8]
-   209 00000125 FF7104                  push dword [ecx + vector.a + point.y]
-   210 00000128 8B4D08                  mov ecx, [ebp + 8]
-   211 0000012B FF710C                  push dword [ecx + vector.b + point.y]
-   212 0000012E 5B                      pop ebx
-   213 0000012F 5A                      pop edx
-   214 00000130 29DA                    sub edx, ebx
-   215 00000132 89D0                    mov eax, edx
-   216 00000134 50                      push eax
-   217 00000135 8B4D08                  mov ecx, [ebp + 8]
-   218 00000138 FF7104                  push dword [ecx + vector.a + point.y]
-   219 0000013B 8B4D08                  mov ecx, [ebp + 8]
-   220 0000013E FF710C                  push dword [ecx + vector.b + point.y]
-   221 00000141 5B                      pop ebx
-   222 00000142 5A                      pop edx
-   223 00000143 29DA                    sub edx, ebx
-   224 00000145 89D0                    mov eax, edx
-   225 00000147 50                      push eax
-   226 00000148 5B                      pop ebx
-   227 00000149 58                      pop eax
-   228 0000014A F7EB                    imul ebx
-   229 0000014C 50                      push eax
-   230 0000014D 5B                      pop ebx
-   231 0000014E 5A                      pop edx
-   232 0000014F 01DA                    add edx, ebx
-   233 00000151 89D0                    mov eax, edx
-   234 00000153 50                      push eax
-   235 00000154 58                      pop eax
-   236 00000155 8945FC                  mov [ebp - 4], eax
-   237 00000158 FF75FC                  push dword [ebp - 4]
-   238 0000015B 58                      pop eax
-   239 0000015C 89EC                    mov esp, ebp
-   240 0000015E 5D                      pop ebp
-   241 0000015F C20400                  ret 4
-   242                                  
-   243                                  
-   244                                  
-   245                                  getBean:
-   246 00000162 55                      push ebp
-   247 00000163 89E5                    mov ebp, esp
-   248 00000165 83EC0C                  sub esp, 12
-   249 00000168 60                      pusha
-   250 00000169 6A08                    push 8
-   251 0000016B E8(00000000)            call malloc
-   252 00000170 83C404                  add esp, 4
-   253 00000173 8945FC                  mov [ebp - 4], eax
-   254 00000176 61                      popa
-   255 00000177 6A00                    push 0
-   256 00000179 58                      pop eax
-   257 0000017A 8B4DFC                  mov ecx, [ebp - 4]
-   258 0000017D 894104                  mov [ecx + firstClass.flag], eax
-   259 00000180 6A06                    push 6
-   260 00000182 E828FFFFFF              call recurse
-   261 00000187 50                      push eax
-   262 00000188 58                      pop eax
-   263 00000189 8B4DFC                  mov ecx, [ebp - 4]
-   264 0000018C 8901                    mov [ecx + firstClass.num], eax
-   265 0000018E 8B4DFC                  mov ecx, [ebp - 4]
-   266 00000191 FF7104                  push dword [ecx + firstClass.flag]
-   267 00000194 FF35[18000000]          push dword [globIntVar]
-   268 0000019A 6A00                    push 0
-   269 0000019C 5B                      pop ebx
-   270 0000019D 5A                      pop edx
-   271 0000019E 39DA                    cmp edx, ebx
-   272 000001A0 7407                    je  L217
-   273 000001A2 B800000000              mov eax, 0
-   274 000001A7 EB05                    jmp L218
-   275                                  L217:
-   276 000001A9 B801000000              mov eax, 1
-   277                                  L218:
-   278 000001AE 50                      push eax
-   279 000001AF 5B                      pop ebx
-   280 000001B0 5A                      pop edx
-   281 000001B1 83FA01                  cmp edx, 1
-   282 000001B4 750C                    jne L205
-   283 000001B6 83FB01                  cmp ebx, 1
-   284 000001B9 7507                    jne L205
-   285 000001BB B801000000              mov eax, 1
-   286 000001C0 EB05                    jmp L206
-   287                                  L205:
-   288 000001C2 B800000000              mov eax, 0
-   289                                  L206:
-   290 000001C7 50                      push eax
-   291 000001C8 58                      pop eax
-   292 000001C9 8945F8                  mov [ebp - 8], eax
-   293 000001CC FF75F8                  push dword [ebp - 8]
-   294 000001CF 58                      pop eax
-   295 000001D0 83F801                  cmp eax, 1
-   296 000001D3 7515                    jne L229
-   297 000001D5 8B4DFC                  mov ecx, [ebp - 4]
-   298 000001D8 FF7104                  push dword [ecx + firstClass.flag]
-   299 000001DB 68[00000000]            push int_format
-   300 000001E0 E8(00000000)            call printf
-   301 000001E5 83C408                  add esp, 8
-   302 000001E8 EB12                    jmp L230
-   303                                  L229:
-   304 000001EA 8B4DFC                  mov ecx, [ebp - 4]
-   305 000001ED FF31                    push dword [ecx + firstClass.num]
-   306 000001EF 68[00000000]            push int_format
-   307 000001F4 E8(00000000)            call printf
-   308 000001F9 83C408                  add esp, 8
-   309                                  L230:
-   310 000001FC FF75FC                  push dword [ebp - 4]
-   311 000001FF 6A08                    push 8
-   312 00000201 E8(00000000)            call malloc
-   313 00000206 83C404                  add esp, 4
-   314 00000209 5B                      pop ebx
-   315 0000020A 6A08                    push 8
-   316 0000020C 53                      push ebx
-   317 0000020D 50                      push eax
-   318 0000020E E8(00000000)            call memcpy
-   319 00000213 83C40C                  add esp, 12
-   320 00000216 50                      push eax
-   321 00000217 58                      pop eax
-   322 00000218 60                      pusha
-   323 00000219 FF75FC                  push dword [ebp - 4]
-   324 0000021C E8(00000000)            call free
-   325 00000221 83C404                  add esp, 4
-   326 00000224 61                      popa
-   327 00000225 89EC                    mov esp, ebp
-   328 00000227 5D                      pop ebp
-   329 00000228 C3                      ret
-   330                                  
-   331                                  
-   332                                  
-   333                                  strread:
-   334 00000229 55                      push ebp
-   335 0000022A 89E5                    mov ebp, esp
-   336 0000022C 83EC08                  sub esp, 8
-   337 0000022F 60                      pusha
-   338 00000230 6800010000              push 256
-   339 00000235 E8(00000000)            call malloc
-   340 0000023A 83C404                  add esp, 4
-   341 0000023D 8945FC                  mov [ebp - 4], eax
-   342 00000240 FF75FC                  push dword [ebp - 4]
-   343 00000243 68[0C000000]            push str_format
-   344 00000248 E8(00000000)            call scanf
-   345 0000024D 83C408                  add esp, 8
-   346 00000250 61                      popa
-   347 00000251 FF75FC                  push dword [ebp - 4]
-   348 00000254 6800010000              push 256
-   349 00000259 E8(00000000)            call malloc
-   350 0000025E 83C404                  add esp, 4
-   351 00000261 5B                      pop ebx
-   352 00000262 53                      push ebx
-   353 00000263 50                      push eax
-   354 00000264 E8(00000000)            call strcpy
-   355 00000269 83C408                  add esp, 8
-   356 0000026C 50                      push eax
-   357 0000026D 58                      pop eax
-   358 0000026E 89EC                    mov esp, ebp
-   359 00000270 5D                      pop ebp
-   360 00000271 C3                      ret
-   361                                  
-   362                                  
-   363                                  
-   364                                  main:
-   365 00000272 55                      push ebp
-   366 00000273 89E5                    mov ebp, esp
-   367 00000275 83EC2C                  sub esp, 44
-   368 00000278 60                      pusha
-   369 00000279 E882FDFFFF              call glob_assign
-   370 0000027E 61                      popa
-   371 0000027F 60                      pusha
-   372 00000280 6A08                    push 8
-   373 00000282 E8(00000000)            call malloc
-   374 00000287 83C404                  add esp, 4
-   375 0000028A 8945FC                  mov [ebp - 4], eax
-   376 0000028D 61                      popa
-   377 0000028E E8CFFEFFFF              call getBean
-   378 00000293 50                      push eax
-   379 00000294 58                      pop eax
-   380 00000295 8B4DFC                  mov ecx, [ebp - 4]
-   381 00000298 8B10                    mov edx, [eax  + firstClass.num]
-   382 0000029A 8911                    mov [ecx  + firstClass.num], edx
-   383 0000029C 8B4DFC                  mov ecx, [ebp - 4]
-   384 0000029F 8B5004                  mov edx, [eax  + firstClass.flag]
-   385 000002A2 895104                  mov [ecx  + firstClass.flag], edx
-   386 000002A5 60                      pusha
-   387 000002A6 6A0C                    push 12
-   388 000002A8 E8(00000000)            call malloc
-   389 000002AD 83C404                  add esp, 4
-   390 000002B0 8945F8                  mov [ebp - 8], eax
-   391 000002B3 61                      popa
-   392 000002B4 E8A9FEFFFF              call getBean
-   393 000002B9 50                      push eax
-   394 000002BA 58                      pop eax
-   395 000002BB E8A2FEFFFF              call getBean
-   396 000002C0 50                      push eax
-   397 000002C1 58                      pop eax
-   398 000002C2 8B4DF8                  mov ecx, [ebp - 8]
-   399 000002C5 8B10                    mov edx, [eax  + secondClass.index]
-   400 000002C7 8911                    mov [ecx +  + secondClass.index], edx
-   401 000002C9 8B4DF8                  mov ecx, [ebp - 8]
-   402 000002CC 8B5004                  mov edx, [eax  + secondClass.fc + firstClass.num]
-   403 000002CF 895104                  mov [ecx +  + secondClass.fc + firstClass.num], edx
-   404 000002D2 8B4DF8                  mov ecx, [ebp - 8]
-   405 000002D5 8B5008                  mov edx, [eax  + secondClass.fc + firstClass.flag]
-   406 000002D8 895108                  mov [ecx +  + secondClass.fc + firstClass.flag], edx
-   407 000002DB 6A0A                    push 10
-   408 000002DD 58                      pop eax
-   409 000002DE 8B4DF8                  mov ecx, [ebp - 8]
-   410 000002E1 8901                    mov [ecx + secondClass.index], eax
-   411 000002E3 60                      pusha
-   412 000002E4 6A0C                    push 12
-   413 000002E6 E8(00000000)            call malloc
-   414 000002EB 83C404                  add esp, 4
-   415 000002EE 8945F4                  mov [ebp - 12], eax
-   416 000002F1 61                      popa
-   417 000002F2 8B4DF8                  mov ecx, [ebp - 8]
-   418 000002F5 FF7104                  push dword [ecx + secondClass.fc]
-   419 000002F8 58                      pop eax
-   420 000002F9 8B4DF8                  mov ecx, [ebp - 8]
-   421 000002FC 51                      push ecx
-   422 000002FD 58                      pop eax
-   423 000002FE 8B4DF4                  mov ecx, [ebp - 12]
-   424 00000301 8B5004                  mov edx, [eax  + secondClass.fc + secondClass.index]
-   425 00000304 8911                    mov [ecx +  + secondClass.index], edx
-   426 00000306 8B4DF4                  mov ecx, [ebp - 12]
-   427 00000309 8B5008                  mov edx, [eax  + secondClass.fc + secondClass.fc + firstClass.num]
-   428 0000030C 895104                  mov [ecx +  + secondClass.fc + firstClass.num], edx
-   429 0000030F 8B4DF4                  mov ecx, [ebp - 12]
-   430 00000312 8B500C                  mov edx, [eax  + secondClass.fc + secondClass.fc + firstClass.flag]
-   431 00000315 895108                  mov [ecx +  + secondClass.fc + firstClass.flag], edx
-   432 00000318 6A32                    push 50
-   433 0000031A 58                      pop eax
-   434 0000031B 8B4DF4                  mov ecx, [ebp - 12]
-   435 0000031E 8901                    mov [ecx + secondClass.index], eax
-   436 00000320 68[64000000]            push tmp343
-   437 00000325 68[0C000000]            push str_format
-   438 0000032A E8(00000000)            call printf
-   439 0000032F 83C408                  add esp, 8
-   440 00000332 6A06                    push 6
-   441 00000334 58                      pop eax
-   442 00000335 8945F0                  mov [ebp - 16], eax
-   443 00000338 60                      pusha
-   444 00000339 6A08                    push 8
-   445 0000033B E8(00000000)            call malloc
-   446 00000340 83C404                  add esp, 4
-   447 00000343 8945EC                  mov [ebp - 20], eax
-   448 00000346 61                      popa
-   449 00000347 6A00                    push 0
-   450 00000349 58                      pop eax
-   451 0000034A 8B4DEC                  mov ecx, [ebp - 20]
-   452 0000034D 894104                  mov [ecx + point.y], eax
-   453 00000350 6A00                    push 0
-   454 00000352 58                      pop eax
-   455 00000353 8B4DEC                  mov ecx, [ebp - 20]
-   456 00000356 8901                    mov [ecx + point.x], eax
-   457 00000358 60                      pusha
-   458 00000359 6A08                    push 8
-   459 0000035B E8(00000000)            call malloc
-   460 00000360 83C404                  add esp, 4
-   461 00000363 8945E8                  mov [ebp - 24], eax
-   462 00000366 61                      popa
-   463 00000367 6A04                    push 4
-   464 00000369 58                      pop eax
-   465 0000036A 8B4DE8                  mov ecx, [ebp - 24]
-   466 0000036D 894104                  mov [ecx + point.y], eax
-   467 00000370 6A03                    push 3
-   468 00000372 58                      pop eax
-   469 00000373 8B4DE8                  mov ecx, [ebp - 24]
-   470 00000376 8901                    mov [ecx + point.x], eax
-   471 00000378 60                      pusha
-   472 00000379 6A10                    push 16
-   473 0000037B E8(00000000)            call malloc
-   474 00000380 83C404                  add esp, 4
-   475 00000383 8945E4                  mov [ebp - 28], eax
-   476 00000386 61                      popa
-   477 00000387 FF75EC                  push dword [ebp - 20]
-   478 0000038A 58                      pop eax
-   479 0000038B FF75EC                  push dword [ebp - 20]
-   480 0000038E 58                      pop eax
-   481 0000038F 8B4DE4                  mov ecx, [ebp - 28]
-   482 00000392 8B10                    mov edx, [eax  + vector.a + point.x]
-   483 00000394 8911                    mov [ecx +  + vector.a + point.x], edx
-   484 00000396 8B4DE4                  mov ecx, [ebp - 28]
-   485 00000399 8B5004                  mov edx, [eax  + vector.a + point.y]
-   486 0000039C 895104                  mov [ecx +  + vector.a + point.y], edx
-   487 0000039F 8B4DE4                  mov ecx, [ebp - 28]
-   488 000003A2 8B5008                  mov edx, [eax  + vector.b + point.x]
-   489 000003A5 895108                  mov [ecx +  + vector.b + point.x], edx
-   490 000003A8 8B4DE4                  mov ecx, [ebp - 28]
-   491 000003AB 8B500C                  mov edx, [eax  + vector.b + point.y]
-   492 000003AE 89510C                  mov [ecx +  + vector.b + point.y], edx
-   493 000003B1 FF75E8                  push dword [ebp - 24]
-   494 000003B4 58                      pop eax
-   495 000003B5 FF75E8                  push dword [ebp - 24]
-   496 000003B8 58                      pop eax
-   497 000003B9 8B4DE4                  mov ecx, [ebp - 28]
-   498 000003BC 8B10                    mov edx, [eax  + vector.a + point.x]
-   499 000003BE 8911                    mov [ecx +  + vector.a + point.x], edx
-   500 000003C0 8B4DE4                  mov ecx, [ebp - 28]
-   501 000003C3 8B5004                  mov edx, [eax  + vector.a + point.y]
-   502 000003C6 895104                  mov [ecx +  + vector.a + point.y], edx
-   503 000003C9 8B4DE4                  mov ecx, [ebp - 28]
-   504 000003CC 8B5008                  mov edx, [eax  + vector.b + point.x]
-   505 000003CF 895108                  mov [ecx +  + vector.b + point.x], edx
-   506 000003D2 8B4DE4                  mov ecx, [ebp - 28]
-   507 000003D5 8B500C                  mov edx, [eax  + vector.b + point.y]
-   508 000003D8 89510C                  mov [ecx +  + vector.b + point.y], edx
-   509 000003DB 60                      pusha
-   510 000003DC 6A08                    push 8
-   511 000003DE E8(00000000)            call malloc
-   512 000003E3 83C404                  add esp, 4
-   513 000003E6 8945E0                  mov [ebp - 32], eax
-   514 000003E9 61                      popa
-   515 000003EA 8B4DE4                  mov ecx, [ebp - 28]
-   516 000003ED 51                      push ecx
-   517 000003EE 58                      pop eax
-   518 000003EF 8B4DE0                  mov ecx, [ebp - 32]
-   519 000003F2 8B10                    mov edx, [eax  + vector.a + point.x]
-   520 000003F4 8911                    mov [ecx  + point.x], edx
-   521 000003F6 8B4DE0                  mov ecx, [ebp - 32]
-   522 000003F9 8B5004                  mov edx, [eax  + vector.a + point.y]
-   523 000003FC 895104                  mov [ecx  + point.y], edx
-   524 000003FF FF75E0                  push dword [ebp - 32]
-   525 00000402 58                      pop eax
-   526 00000403 8B4DE4                  mov ecx, [ebp - 28]
-   527 00000406 8B10                    mov edx, [eax  + point.x]
-   528 00000408 895108                  mov [ecx + vector.b + point.x], edx
-   529 0000040B 8B4DE4                  mov ecx, [ebp - 28]
-   530 0000040E 8B5004                  mov edx, [eax  + point.y]
-   531 00000411 89510C                  mov [ecx + vector.b + point.y], edx
-   532 00000414 68[94000000]            push tmp455
-   533 00000419 68[0C000000]            push str_format
-   534 0000041E E8(00000000)            call printf
-   535 00000423 83C408                  add esp, 8
-   536 00000426 8B4DE4                  mov ecx, [ebp - 28]
-   537 00000429 FF31                    push dword [ecx + vector.a + point.x]
-   538 0000042B 68[00000000]            push int_format
-   539 00000430 E8(00000000)            call printf
-   540 00000435 83C408                  add esp, 8
-   541 00000438 68[AC000000]            push tmp471
-   542 0000043D 68[0C000000]            push str_format
-   543 00000442 E8(00000000)            call printf
-   544 00000447 83C408                  add esp, 8
-   545 0000044A 8B4DE4                  mov ecx, [ebp - 28]
-   546 0000044D FF7104                  push dword [ecx + vector.a + point.y]
-   547 00000450 68[00000000]            push int_format
-   548 00000455 E8(00000000)            call printf
-   549 0000045A 83C408                  add esp, 8
-   550 0000045D 68[C4000000]            push tmp487
-   551 00000462 68[0C000000]            push str_format
-   552 00000467 E8(00000000)            call printf
-   553 0000046C 83C408                  add esp, 8
-   554 0000046F 8B4DE4                  mov ecx, [ebp - 28]
-   555 00000472 FF7108                  push dword [ecx + vector.b + point.x]
-   556 00000475 68[00000000]            push int_format
-   557 0000047A E8(00000000)            call printf
-   558 0000047F 83C408                  add esp, 8
-   559 00000482 68[DC000000]            push tmp503
-   560 00000487 68[0C000000]            push str_format
-   561 0000048C E8(00000000)            call printf
-   562 00000491 83C408                  add esp, 8
-   563 00000494 8B4DE4                  mov ecx, [ebp - 28]
-   564 00000497 FF710C                  push dword [ecx + vector.b + point.y]
-   565 0000049A 68[00000000]            push int_format
-   566 0000049F E8(00000000)            call printf
-   567 000004A4 83C408                  add esp, 8
-   568 000004A7 68[F4000000]            push tmp519
-   569 000004AC 68[0C000000]            push str_format
-   570 000004B1 E8(00000000)            call printf
-   571 000004B6 83C408                  add esp, 8
-   572 000004B9 68[0C010000]            push tmp527
-   573 000004BE 58                      pop eax
-   574 000004BF 60                      pusha
-   575 000004C0 6800010000              push 256
-   576 000004C5 E8(00000000)            call malloc
-   577 000004CA 83C404                  add esp, 4
-   578 000004CD 8945DC                  mov [ebp - 36], eax
-   579 000004D0 61                      popa
-   580 000004D1 60                      pusha
-   581 000004D2 50                      push eax
-   582 000004D3 FF75DC                  push dword [ebp - 36]
-   583 000004D6 E8(00000000)            call strcpy
-   584 000004DB 83C408                  add esp, 8
-   585 000004DE 61                      popa
-   586 000004DF 68[24010000]            push tmp535
-   587 000004E4 58                      pop eax
-   588 000004E5 60                      pusha
-   589 000004E6 6800010000              push 256
-   590 000004EB E8(00000000)            call malloc
-   591 000004F0 83C404                  add esp, 4
-   592 000004F3 8945D8                  mov [ebp - 40], eax
-   593 000004F6 61                      popa
-   594 000004F7 60                      pusha
-   595 000004F8 50                      push eax
-   596 000004F9 FF75D8                  push dword [ebp - 40]
-   597 000004FC E8(00000000)            call strcpy
-   598 00000501 83C408                  add esp, 8
-   599 00000504 61                      popa
-   600 00000505 FF75DC                  push dword [ebp - 36]
-   601 00000508 FF75D8                  push dword [ebp - 40]
-   602 0000050B E8(00000000)            call strcmp
-   603 00000510 83C408                  add esp, 8
-   604 00000513 89C3                    mov ebx, eax
-   605 00000515 83FB00                  cmp ebx, 0
-   606 00000518 7407                    je L547
-   607 0000051A B800000000              mov eax, 0
-   608 0000051F EB05                    jmp L548
-   609                                  L547:
-   610 00000521 B801000000              mov eax, 1
-   611                                  L548:
-   612 00000526 50                      push eax
-   613 00000527 58                      pop eax
-   614 00000528 83F801                  cmp eax, 1
-   615 0000052B 7572                    jne L539
-   616 0000052D 68[38010000]            push tmp559
-   617 00000532 68[0C000000]            push str_format
-   618 00000537 E8(00000000)            call printf
-   619 0000053C 83C408                  add esp, 8
-   620 0000053F FF75DC                  push dword [ebp - 36]
-   621 00000542 FF75D8                  push dword [ebp - 40]
-   622 00000545 6800010000              push 256
-   623 0000054A E8(00000000)            call malloc
-   624 0000054F 83C404                  add esp, 4
-   625 00000552 5B                      pop ebx
-   626 00000553 5A                      pop edx
-   627 00000554 52                      push edx
-   628 00000555 50                      push eax
-   629 00000556 E8(00000000)            call strcpy
-   630 0000055B 83C408                  add esp, 8
-   631 0000055E 53                      push ebx
-   632 0000055F 50                      push eax
-   633 00000560 E8(00000000)            call strcat
-   634 00000565 83C408                  add esp, 8
-   635 00000568 50                      push eax
-   636 00000569 68[40010000]            push tmp560
-   637 0000056E 6800010000              push 256
-   638 00000573 E8(00000000)            call malloc
-   639 00000578 83C404                  add esp, 4
-   640 0000057B 5B                      pop ebx
-   641 0000057C 5A                      pop edx
-   642 0000057D 52                      push edx
-   643 0000057E 50                      push eax
-   644 0000057F E8(00000000)            call strcpy
-   645 00000584 83C408                  add esp, 8
-   646 00000587 53                      push ebx
-   647 00000588 50                      push eax
-   648 00000589 E8(00000000)            call strcat
-   649 0000058E 83C408                  add esp, 8
-   650 00000591 50                      push eax
-   651 00000592 68[0C000000]            push str_format
-   652 00000597 E8(00000000)            call printf
-   653 0000059C 83C408                  add esp, 8
-   654                                  L539:
-   655 0000059F 68[64010000]            push tmp579
-   656 000005A4 68[0C000000]            push str_format
-   657 000005A9 E8(00000000)            call printf
-   658 000005AE 83C408                  add esp, 8
-   659 000005B1 6A00                    push 0
-   660 000005B3 58                      pop eax
-   661 000005B4 60                      pusha
-   662 000005B5 FF75F8                  push dword [ebp - 8]
-   663 000005B8 E8(00000000)            call free
-   664 000005BD 83C404                  add esp, 4
-   665 000005C0 61                      popa
-   666 000005C1 60                      pusha
-   667 000005C2 FF75F4                  push dword [ebp - 12]
-   668 000005C5 E8(00000000)            call free
-   669 000005CA 83C404                  add esp, 4
-   670 000005CD 61                      popa
-   671 000005CE 60                      pusha
-   672 000005CF FF75FC                  push dword [ebp - 4]
-   673 000005D2 E8(00000000)            call free
-   674 000005D7 83C404                  add esp, 4
-   675 000005DA 61                      popa
-   676 000005DB 60                      pusha
-   677 000005DC FF75E4                  push dword [ebp - 28]
-   678 000005DF E8(00000000)            call free
-   679 000005E4 83C404                  add esp, 4
-   680 000005E7 61                      popa
-   681 000005E8 60                      pusha
-   682 000005E9 FF75EC                  push dword [ebp - 20]
-   683 000005EC E8(00000000)            call free
-   684 000005F1 83C404                  add esp, 4
-   685 000005F4 61                      popa
-   686 000005F5 60                      pusha
-   687 000005F6 FF75D8                  push dword [ebp - 40]
-   688 000005F9 E8(00000000)            call free
-   689 000005FE 83C404                  add esp, 4
-   690 00000601 61                      popa
-   691 00000602 60                      pusha
-   692 00000603 FF75E8                  push dword [ebp - 24]
-   693 00000606 E8(00000000)            call free
-   694 0000060B 83C404                  add esp, 4
-   695 0000060E 61                      popa
-   696 0000060F 60                      pusha
-   697 00000610 FF75E0                  push dword [ebp - 32]
-   698 00000613 E8(00000000)            call free
-   699 00000618 83C404                  add esp, 4
-   700 0000061B 61                      popa
-   701 0000061C 60                      pusha
-   702 0000061D FF75DC                  push dword [ebp - 36]
-   703 00000620 E8(00000000)            call free
-   704 00000625 83C404                  add esp, 4
-   705 00000628 61                      popa
-   706 00000629 89EC                    mov esp, ebp
-   707 0000062B 5D                      pop ebp
-   708 0000062C C3                      ret
-   709                                  
-   710                                  
-   711                                  
-   712                                  power:
-   713 0000062D 55                      push ebp
-   714 0000062E 89E5                    mov ebp, esp
-   715 00000630 83EC08                  sub esp, 8
-   716 00000633 6A01                    push 1
-   717 00000635 58                      pop eax
-   718 00000636 8945FC                  mov [ebp - 4], eax
-   719 00000639 FF7508                  push dword [ebp + 8]
-   720 0000063C 6A00                    push 0
-   721 0000063E 5B                      pop ebx
-   722 0000063F 5A                      pop edx
-   723 00000640 39DA                    cmp edx, ebx
-   724 00000642 7707                    ja  L605
-   725 00000644 B800000000              mov eax, 0
-   726 00000649 EB05                    jmp L606
-   727                                  L605:
-   728 0000064B B801000000              mov eax, 1
-   729                                  L606:
-   730 00000650 50                      push eax
-   731 00000651 58                      pop eax
-   732 00000652 83F801                  cmp eax, 1
-   733 00000655 757B                    jne L599
-   734                                  L600:
-   735 00000657 FF7508                  push dword [ebp + 8]
-   736 0000065A 6A02                    push 2
-   737 0000065C 5B                      pop ebx
-   738 0000065D 58                      pop eax
-   739 0000065E BA00000000              mov edx, 0
-   740 00000663 F7FB                    idiv ebx
-   741 00000665 89D0                    mov eax, edx
-   742 00000667 50                      push eax
-   743 00000668 6A01                    push 1
-   744 0000066A 5B                      pop ebx
-   745 0000066B 5A                      pop edx
-   746 0000066C 39DA                    cmp edx, ebx
-   747 0000066E 7407                    je  L621
-   748 00000670 B800000000              mov eax, 0
-   749 00000675 EB05                    jmp L622
-   750                                  L621:
-   751 00000677 B801000000              mov eax, 1
-   752                                  L622:
-   753 0000067C 50                      push eax
-   754 0000067D 58                      pop eax
-   755 0000067E 83F801                  cmp eax, 1
-   756 00000681 750F                    jne L613
-   757 00000683 FF75FC                  push dword [ebp - 4]
-   758 00000686 FF750C                  push dword [ebp + 12]
-   759 00000689 5B                      pop ebx
-   760 0000068A 58                      pop eax
-   761 0000068B F7EB                    imul ebx
-   762 0000068D 50                      push eax
-   763 0000068E 58                      pop eax
-   764 0000068F 8945FC                  mov [ebp - 4], eax
-   765                                  L613:
-   766 00000692 FF750C                  push dword [ebp + 12]
-   767 00000695 FF750C                  push dword [ebp + 12]
-   768 00000698 5B                      pop ebx
-   769 00000699 58                      pop eax
-   770 0000069A F7EB                    imul ebx
-   771 0000069C 50                      push eax
-   772 0000069D 58                      pop eax
-   773 0000069E 89450C                  mov [ebp + 12], eax
-   774 000006A1 FF7508                  push dword [ebp + 8]
-   775 000006A4 6A02                    push 2
-   776 000006A6 5B                      pop ebx
-   777 000006A7 58                      pop eax
-   778 000006A8 BA00000000              mov edx, 0
-   779 000006AD F7FB                    idiv ebx
-   780 000006AF 50                      push eax
-   781 000006B0 58                      pop eax
-   782 000006B1 894508                  mov [ebp + 8], eax
-   783 000006B4 FF7508                  push dword [ebp + 8]
-   784 000006B7 6A00                    push 0
-   785 000006B9 5B                      pop ebx
-   786 000006BA 5A                      pop edx
-   787 000006BB 39DA                    cmp edx, ebx
-   788 000006BD 7707                    ja  L661
-   789 000006BF B800000000              mov eax, 0
-   790 000006C4 EB05                    jmp L662
-   791                                  L661:
-   792 000006C6 B801000000              mov eax, 1
-   793                                  L662:
-   794 000006CB 50                      push eax
-   795 000006CC 58                      pop eax
-   796 000006CD 83F801                  cmp eax, 1
-   797 000006D0 7485                    je L600
-   798                                  L599:
-   799 000006D2 FF75FC                  push dword [ebp - 4]
-   800 000006D5 58                      pop eax
-   801 000006D6 89EC                    mov esp, ebp
-   802 000006D8 5D                      pop ebp
-   803 000006D9 C20800                  ret 8
-   804                                  
-   805                                  
-   806                                  
-   807                                  section .data
-   808 00000000 256400000A00000000-     int_format dd "%d", 10, 0
-   809 00000009 000000             
-   810 0000000C 257300000A00000000-     str_format dd "%s", 10, 0
-   811 00000015 000000             
-   812 00000018 00000000                globIntVar: dd 0
-   813 0000001C 497420697320676C6F-     globStringVarWithInit: dd "It is global string", 0
-   814 00000025 62616C20737472696E-
-   815 0000002E 670000000000       
-   816 00000034 00000000                globBoolVar: dd 0
-   817 00000038 68656C6C6F2C200000-     tmp1: dd "hello, ", 0
-   818 00000041 000000             
-   819 00000044 676F6464616D6E2000-     tmp2: dd "goddamn ", 0
-   820 0000004D 000000             
-   821 00000050 6D6F74686572667563-     tmp3: dd "motherfuckers!", 0
-   822 00000059 6B6572732100000000-
-   823 00000062 0000               
-   824 00000064 68656C6C6F2C20676F-     tmp343: dd "hello, goddamn motherfuckers!", 0
-   825 0000006D 6464616D6E206D6F74-
-   826 00000076 6865726675636B6572-
-   827 0000007F 732100000000000000 
-   828 00000088 762E612E78203D2000-     tmp344: dd "v.a.x = ", 0
-   829 00000091 000000             
-   830 00000094 762E612E78203D2000-     tmp455: dd "v.a.x = ", 0
-   831 0000009D 000000             
-   832 000000A0 762E612E79203D2000-     tmp456: dd "v.a.y = ", 0
-   833 000000A9 000000             
-   834 000000AC 762E612E79203D2000-     tmp471: dd "v.a.y = ", 0
-   835 000000B5 000000             
-   836 000000B8 762E622E78203D2000-     tmp472: dd "v.b.x = ", 0
-   837 000000C1 000000             
-   838 000000C4 762E622E78203D2000-     tmp487: dd "v.b.x = ", 0
-   839 000000CD 000000             
-   840 000000D0 762E622E79203D2000-     tmp488: dd "v.b.y = ", 0
-   841 000000D9 000000             
-   842 000000DC 762E622E79203D2000-     tmp503: dd "v.b.y = ", 0
-   843 000000E5 000000             
-   844 000000E8 202020202000000000-     tmp504: dd "     ", 0
-   845 000000F1 000000             
-   846 000000F4 202020202000000000-     tmp519: dd "     ", 0
-   847 000000FD 000000             
-   848 00000100 68656C6C6F2C200000-     tmp520: dd "hello, ", 0
-   849 00000109 000000             
-   850 0000010C 68656C6C6F2C200000-     tmp527: dd "hello, ", 0
-   851 00000115 000000             
-   852 00000118 68656C6C6F2C200000-     tmp528: dd "hello, ", 0
-   853 00000121 000000             
-   854 00000124 68656C6C6F2C200000-     tmp535: dd "hello, ", 0
-   855 0000012D 000000             
-   856 00000130 2000000000000000        tmp536: dd " ", 0
-   857 00000138 2000000000000000        tmp559: dd " ", 0
-   858 00000140 6675636B6572732120-     tmp560: dd "fuckers! ", 0
-   859 00000140 00000000000000     
-   860 00000150 696D20736F72727920-     tmp561: dd "im sorry     ", 0
-   861 00000159 202020200000000000-
-   862 00000162 0000               
-   863 00000164 696D20736F72727920-     tmp579: dd "im sorry     ", 0
-   864 0000016D 202020200000000000-
-   865 00000176 0000               
-   866                                  
-   867                                  section .bss
-   868 00000000 <res 00000008>          motherfucker: resb firstClass.size
+    30                                  section .text
+    31                                  global main
+    32                                  
+    33                                  glob_assign:
+    34 00000000 55                      push ebp
+    35 00000001 89E5                    mov ebp, esp
+    36 00000003 89EC                    mov esp, ebp
+    37 00000005 5D                      pop ebp
+    38 00000006 C3                      ret
+    39                                  
+    40                                  
+    41                                  main:
+    42 00000007 55                      push ebp
+    43 00000008 89E5                    mov ebp, esp
+    44 0000000A 83EC10                  sub esp, 16
+    45 0000000D 60                      pusha
+    46 0000000E E8EDFFFFFF              call glob_assign
+    47 00000013 61                      popa
+    48 00000014 60                      pusha
+    49 00000015 6A08                    push 8
+    50 00000017 E8(00000000)            call malloc
+    51 0000001C 83C404                  add esp, 4
+    52 0000001F 8945FC                  mov [ebp - 4], eax
+    53 00000022 61                      popa
+    54 00000023 68[30000000]            push tmp9
+    55 00000028 58                      pop eax
+    56 00000029 50                      push eax
+    57 0000002A 6800010000              push 256
+    58 0000002F E8(00000000)            call malloc
+    59 00000034 83C404                  add esp, 4
+    60 00000037 89C2                    mov edx, eax
+    61 00000039 58                      pop eax
+    62 0000003A 50                      push eax
+    63 0000003B 52                      push edx
+    64 0000003C E8(00000000)            call strcpy
+    65 00000041 83C408                  add esp, 8
+    66 00000044 8B4DFC                  mov ecx, [ebp - 4]
+    67 00000047 895104                  mov [ecx +map.value], edx
+    68 0000004A 60                      pusha
+    69 0000004B 50                      push eax
+    70 0000004C 52                      push edx
+    71 0000004D E8(00000000)            call strcpy
+    72 00000052 83C408                  add esp, 8
+    73 00000055 61                      popa
+    74 00000056 689A020000              push 666
+    75 0000005B 58                      pop eax
+    76 0000005C 8B4DFC                  mov ecx, [ebp - 4]
+    77 0000005F 8901                    mov [ecx + map.index], eax
+    78 00000061 60                      pusha
+    79 00000062 6A08                    push 8
+    80 00000064 E8(00000000)            call malloc
+    81 00000069 83C404                  add esp, 4
+    82 0000006C 8945F8                  mov [ebp - 8], eax
+    83 0000006F 61                      popa
+    84 00000070 FF75FC                  push dword [ebp - 4]
+    85 00000073 58                      pop eax
+    86 00000074 8B4DF8                  mov ecx, [ebp - 8]
+    87 00000077 8B10                    mov edx, [eax  + map.index]
+    88 00000079 8911                    mov [ecx  + map.index], edx
+    89 0000007B 50                      push eax
+    90 0000007C 6800010000              push 256
+    91 00000081 E8(00000000)            call malloc
+    92 00000086 83C404                  add esp, 4
+    93 00000089 89C3                    mov ebx, eax
+    94 0000008B 58                      pop eax
+    95 0000008C 8B4DF8                  mov ecx, [ebp - 8]
+    96 0000008F 8B5004                  mov edx, [eax  + map.value]
+    97 00000092 895904                  mov [ecx  + map.value], ebx
+    98 00000095 60                      pusha
+    99 00000096 52                      push edx
+   100 00000097 53                      push ebx
+   101 00000098 E8(00000000)            call strcpy
+   102 0000009D 83C408                  add esp, 8
+   103 000000A0 61                      popa
+   104 000000A1 68[3C000000]            push tmp10
+   105 000000A6 68[18000000]            push str
+   106 000000AB 6800010000              push 256
+   107 000000B0 E8(00000000)            call malloc
+   108 000000B5 83C404                  add esp, 4
+   109 000000B8 5B                      pop ebx
+   110 000000B9 5A                      pop edx
+   111 000000BA 52                      push edx
+   112 000000BB 50                      push eax
+   113 000000BC E8(00000000)            call strcpy
+   114 000000C1 83C408                  add esp, 8
+   115 000000C4 53                      push ebx
+   116 000000C5 50                      push eax
+   117 000000C6 E8(00000000)            call strcat
+   118 000000CB 83C408                  add esp, 8
+   119 000000CE 50                      push eax
+   120 000000CF 58                      pop eax
+   121 000000D0 8B4DFC                  mov ecx, [ebp - 4]
+   122 000000D3 60                      pusha
+   123 000000D4 50                      push eax
+   124 000000D5 FF7104                  push dword [ecx + map.value]
+   125 000000D8 E8(00000000)            call strcpy
+   126 000000DD 83C408                  add esp, 8
+   127 000000E0 61                      popa
+   128 000000E1 8B4DFC                  mov ecx, [ebp - 4]
+   129 000000E4 FF31                    push dword [ecx + map.index]
+   130 000000E6 689B020000              push 667
+   131 000000EB 5B                      pop ebx
+   132 000000EC 5A                      pop edx
+   133 000000ED 01DA                    add edx, ebx
+   134 000000EF 89D0                    mov eax, edx
+   135 000000F1 50                      push eax
+   136 000000F2 58                      pop eax
+   137 000000F3 8B4DFC                  mov ecx, [ebp - 4]
+   138 000000F6 8901                    mov [ecx + map.index], eax
+   139 000000F8 60                      pusha
+   140 000000F9 6A10                    push 16
+   141 000000FB E8(00000000)            call malloc
+   142 00000100 83C404                  add esp, 4
+   143 00000103 8945F4                  mov [ebp - 12], eax
+   144 00000106 61                      popa
+   145 00000107 FF75FC                  push dword [ebp - 4]
+   146 0000010A 58                      pop eax
+   147 0000010B 8B4DF4                  mov ecx, [ebp - 12]
+   148 0000010E 8B10                    mov edx, [eax  + map.index]
+   149 00000110 895108                  mov [ecx + vecmap.x2 + map.index], edx
+   150 00000113 50                      push eax
+   151 00000114 6800010000              push 256
+   152 00000119 E8(00000000)            call malloc
+   153 0000011E 83C404                  add esp, 4
+   154 00000121 89C3                    mov ebx, eax
+   155 00000123 58                      pop eax
+   156 00000124 8B4DF4                  mov ecx, [ebp - 12]
+   157 00000127 8B5004                  mov edx, [eax  + map.value]
+   158 0000012A 89590C                  mov [ecx + vecmap.x2 + map.value], ebx
+   159 0000012D 60                      pusha
+   160 0000012E 52                      push edx
+   161 0000012F 53                      push ebx
+   162 00000130 E8(00000000)            call strcpy
+   163 00000135 83C408                  add esp, 8
+   164 00000138 61                      popa
+   165 00000139 FF75F8                  push dword [ebp - 8]
+   166 0000013C 58                      pop eax
+   167 0000013D 8B4DF4                  mov ecx, [ebp - 12]
+   168 00000140 8B10                    mov edx, [eax  + map.index]
+   169 00000142 8911                    mov [ecx + vecmap.x1 + map.index], edx
+   170 00000144 50                      push eax
+   171 00000145 6800010000              push 256
+   172 0000014A E8(00000000)            call malloc
+   173 0000014F 83C404                  add esp, 4
+   174 00000152 89C3                    mov ebx, eax
+   175 00000154 58                      pop eax
+   176 00000155 8B4DF4                  mov ecx, [ebp - 12]
+   177 00000158 8B5004                  mov edx, [eax  + map.value]
+   178 0000015B 895904                  mov [ecx + vecmap.x1 + map.value], ebx
+   179 0000015E 60                      pusha
+   180 0000015F 52                      push edx
+   181 00000160 53                      push ebx
+   182 00000161 E8(00000000)            call strcpy
+   183 00000166 83C408                  add esp, 8
+   184 00000169 61                      popa
+   185 0000016A 68[60000000]            push tmp73
+   186 0000016F 68[0C000000]            push str_format
+   187 00000174 E8(00000000)            call printf
+   188 00000179 83C408                  add esp, 8
+   189 0000017C 8B4DF4                  mov ecx, [ebp - 12]
+   190 0000017F FF31                    push dword [ecx + vecmap.x1 + map.index]
+   191 00000181 68[00000000]            push int_format
+   192 00000186 E8(00000000)            call printf
+   193 0000018B 83C408                  add esp, 8
+   194 0000018E 68[8C000000]            push tmp89
+   195 00000193 68[0C000000]            push str_format
+   196 00000198 E8(00000000)            call printf
+   197 0000019D 83C408                  add esp, 8
+   198 000001A0 8B4DF4                  mov ecx, [ebp - 12]
+   199 000001A3 FF7104                  push dword [ecx + vecmap.x1 + map.value]
+   200 000001A6 68[0C000000]            push str_format
+   201 000001AB E8(00000000)            call printf
+   202 000001B0 83C408                  add esp, 8
+   203 000001B3 68[A8000000]            push tmp105
+   204 000001B8 68[0C000000]            push str_format
+   205 000001BD E8(00000000)            call printf
+   206 000001C2 83C408                  add esp, 8
+   207 000001C5 68[C8000000]            push tmp113
+   208 000001CA 68[0C000000]            push str_format
+   209 000001CF E8(00000000)            call printf
+   210 000001D4 83C408                  add esp, 8
+   211 000001D7 8B4DF4                  mov ecx, [ebp - 12]
+   212 000001DA FF7108                  push dword [ecx + vecmap.x2 + map.index]
+   213 000001DD 68[00000000]            push int_format
+   214 000001E2 E8(00000000)            call printf
+   215 000001E7 83C408                  add esp, 8
+   216 000001EA 68[F4000000]            push tmp129
+   217 000001EF 68[0C000000]            push str_format
+   218 000001F4 E8(00000000)            call printf
+   219 000001F9 83C408                  add esp, 8
+   220 000001FC 8B4DF4                  mov ecx, [ebp - 12]
+   221 000001FF FF710C                  push dword [ecx + vecmap.x2 + map.value]
+   222 00000202 68[0C000000]            push str_format
+   223 00000207 E8(00000000)            call printf
+   224 0000020C 83C408                  add esp, 8
+   225 0000020F 68[10010000]            push tmp145
+   226 00000214 68[0C000000]            push str_format
+   227 00000219 E8(00000000)            call printf
+   228 0000021E 83C408                  add esp, 8
+   229 00000221 8B4DFC                  mov ecx, [ebp - 4]
+   230 00000224 8B5104                  mov edx, [ecx  + map.value]
+   231 00000227 60                      pusha
+   232 00000228 52                      push edx
+   233 00000229 E8(00000000)            call free
+   234 0000022E 83C404                  add esp, 4
+   235 00000231 61                      popa
+   236 00000232 60                      pusha
+   237 00000233 FF75FC                  push dword [ebp - 4]
+   238 00000236 E8(00000000)            call free
+   239 0000023B 83C404                  add esp, 4
+   240 0000023E 61                      popa
+   241 0000023F 8B4DF8                  mov ecx, [ebp - 8]
+   242 00000242 8B5104                  mov edx, [ecx  + map.value]
+   243 00000245 60                      pusha
+   244 00000246 52                      push edx
+   245 00000247 E8(00000000)            call free
+   246 0000024C 83C404                  add esp, 4
+   247 0000024F 61                      popa
+   248 00000250 60                      pusha
+   249 00000251 FF75F8                  push dword [ebp - 8]
+   250 00000254 E8(00000000)            call free
+   251 00000259 83C404                  add esp, 4
+   252 0000025C 61                      popa
+   253 0000025D 8B4DF4                  mov ecx, [ebp - 12]
+   254 00000260 8B5104                  mov edx, [ecx  + vecmap.x1 + map.value]
+   255 00000263 60                      pusha
+   256 00000264 52                      push edx
+   257 00000265 E8(00000000)            call free
+   258 0000026A 83C404                  add esp, 4
+   259 0000026D 61                      popa
+   260 0000026E 8B4DF4                  mov ecx, [ebp - 12]
+   261 00000271 8B510C                  mov edx, [ecx  + vecmap.x2 + map.value]
+   262 00000274 60                      pusha
+   263 00000275 52                      push edx
+   264 00000276 E8(00000000)            call free
+   265 0000027B 83C404                  add esp, 4
+   266 0000027E 61                      popa
+   267 0000027F 60                      pusha
+   268 00000280 FF75F4                  push dword [ebp - 12]
+   269 00000283 E8(00000000)            call free
+   270 00000288 83C404                  add esp, 4
+   271 0000028B 61                      popa
+   272 0000028C 89EC                    mov esp, ebp
+   273 0000028E 5D                      pop ebp
+   274 0000028F C3                      ret
+   275                                  
+   276                                  
+   277                                  
+   278                                  section .data
+   279 00000000 256400000A00000000-     int_format dd "%d", 10, 0
+   280 00000009 000000             
+   281 0000000C 257300000A00000000-     str_format dd "%s", 10, 0
+   282 00000015 000000             
+   283 00000018 206368616E63650000-     str: dd " chance", 0
+   284 00000021 000000             
+   285 00000024 666972737400000000-     tmp1: dd "first", 0
+   286 0000002D 000000             
+   287 00000030 666972737400000000-     tmp9: dd "first", 0
+   288 00000039 000000             
+   289 0000003C 7365636F6E64000000-     tmp10: dd "second", 0
+   290 00000045 000000             
+   291 00000048 312E20766D2E78312E-     tmp11: dd "1. vm.x1.index = ", 0
+   292 00000051 696E646578203D2000-
+   293 00000049 000000000000       
+   294 00000060 312E20766D2E78312E-     tmp73: dd "1. vm.x1.index = ", 0
+   295 00000069 696E646578203D2000-
+   296 00000061 000000000000       
+   297 00000078 20766D2E78312E7661-     tmp74: dd " vm.x1.value = ", 0
+   298 00000081 6C7565203D20000000-
+   299 0000008A 0000               
+   300 0000008C 20766D2E78312E7661-     tmp89: dd " vm.x1.value = ", 0
+   301 00000095 6C7565203D20000000-
+   302 0000009E 0000               
+   303 000000A0 2000000000000000        tmp90: dd " ", 0
+   304 000000A8 2000000000000000        tmp105: dd " ", 0
+   305 000000B0 322E20766D2E78322E-     tmp106: dd "2. vm.x2.index = ", 0
+   306 000000B9 696E646578203D2000-
+   307 000000B1 000000000000       
+   308 000000C8 322E20766D2E78322E-     tmp113: dd "2. vm.x2.index = ", 0
+   309 000000D1 696E646578203D2000-
+   310 000000C9 000000000000       
+   311 000000E0 20766D2E78322E7661-     tmp114: dd " vm.x2.value = ", 0
+   312 000000E9 6C7565203D20000000-
+   313 000000F2 0000               
+   314 000000F4 20766D2E78322E7661-     tmp129: dd " vm.x2.value = ", 0
+   315 000000FD 6C7565203D20000000-
+   316 00000106 0000               
+   317 00000108 2000000000000000        tmp130: dd " ", 0
+   318 00000110 2000000000000000        tmp145: dd " ", 0
+   319                                  
+   320                                  section .bss
