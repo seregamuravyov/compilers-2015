@@ -1,0 +1,15 @@
+string globS = "deer!";
+
+int main(){
+    string a = "Hello, ";
+    string b = "dear ";
+
+    if (a != b){
+        write(a + b + globS + " Good luck!");
+    }
+
+    globS = "hair!";
+    write(a + b + globS + " Good luck!");
+
+    return 0;
+}

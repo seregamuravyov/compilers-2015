@@ -1,0 +1,34 @@
+string str = " chance";
+
+struct map {
+    int index;
+    string value;
+}
+
+struct vecmap {
+    map x1;
+    map x2;
+}
+
+int main(){
+    map mp(666, "first");
+    map c = mp;
+
+    mp.value = "second" + str;
+    mp.index = mp.index + 667;
+
+    vecmap vm(c, mp);
+
+    write("1. vm.x1.index = ");
+    write(vm.x1.index);
+    write(" vm.x1.value = ");
+    write(vm.x1.value);
+    write(" ");
+
+    write("2. vm.x2.index = ");
+    write(vm.x2.index);
+    write(" vm.x2.value = ");
+    write(vm.x2.value);
+    write(" ");
+
+}

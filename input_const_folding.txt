@@ -1,0 +1,8 @@
+int main(){
+
+	write("hello, " + "dear " + "man! ");
+	int a = (2 * 2 + 4 * 4 + 2 * 5) / 5;
+	write(a);
+	write(" ");
+	return 0;
+}

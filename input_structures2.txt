@@ -1,0 +1,41 @@
+int globIndex = 100;
+firstClass fc(5 + 5, true || false);
+
+struct firstClass {
+     int num;
+     bool flag;
+}
+
+struct secondClass {
+    int index;
+    firstClass fc;
+}
+
+bool getBean(int a){
+    bool res = (a > 0) && (a <= 20);
+    return res;
+}
+
+int main() {
+     write("1. fc.num = ");
+     write(fc.num);
+     write(" fc.flag = ");
+     write(fc.flag);
+
+     fc.flag = getBean(globIndex);
+     fc.num = 150;
+
+     write("    2. fc.num = ");
+     write(fc.num);
+     write(" fc.flag = ");
+     write(fc.flag);
+
+     secondClass sc(10, fc);
+     secondClass scc(50, sc.fc);
+
+     write("    3. scc.fc.num = ");
+     write(scc.fc.num);
+     write(" scc.fc.flag = ");
+     write(scc.fc.flag);
+     write("        ");
+}

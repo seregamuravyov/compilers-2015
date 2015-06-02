@@ -1,0 +1,39 @@
+struct point {
+    int x;
+    int y;
+}
+
+struct vector {
+    point a;
+    point b;
+}
+
+point increaseCoords(point a){
+    point res = a;
+    res.x = res.x + 1;
+    res.y = res.y + 1;
+    return res;
+}
+
+int getSqrDistance(vector v){
+    int res = (v.b.x - v.a.x)*(v.b.x - v.a.x) + (v.b.y - v.a.y)*(v.b.y - v.a.y);
+    return res;
+}
+
+int main(){
+    point a(1, 1);
+    point b(5, 5);
+    point c(0, 0);
+
+    vector v(a, increaseCoords(b));
+
+    write("Square distance of vector v: ");
+    write(getSqrDistance(v));
+    write("     ");
+
+    vector v2(c, v.b);
+
+    write("Square distance of vector v2: ");
+    write(getSqrDistance(v2));
+    write("     ");
+}
